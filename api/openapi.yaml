@@ -1,0 +1,360 @@
+openapi: 3.1.0
+info:
+  title: API Throughput & Telemetry Lab — Reference Domain
+  version: "1"
+  description: |
+    Contrato único do Domínio de Referência. Toda implementação sob teste
+    honra este documento na íntegra. As decisões normativas e as armadilhas
+    cross-language estão em specs/reference-domain/contract.md — este arquivo
+    é a forma mecânica, verificável por fuzz de contrato.
+
+    contract_version: 1
+servers:
+  - url: http://localhost:8080
+
+tags:
+  - name: products
+  - name: orders
+  - name: operational
+
+paths:
+  /v1/products/{id}:
+    get:
+      tags: [products]
+      operationId: getProductById
+      summary: Point read por chave primária. Nenhum join.
+      parameters:
+        - $ref: '#/components/parameters/PathId'
+      responses:
+        '200':
+          description: Produto
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Product' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /v1/products:
+    get:
+      tags: [products]
+      operationId: listProducts
+      summary: Range scan com paginação por keyset.
+      parameters:
+        - name: category_id
+          in: query
+          required: false
+          schema: { type: integer, format: int64, minimum: 1 }
+        - name: q
+          in: query
+          required: false
+          description: Prefixo de name, case-insensitive.
+          schema: { type: string, minLength: 1, maxLength: 64 }
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: Página de produtos
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ProductPage' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+
+  /v1/orders/{id}:
+    get:
+      tags: [orders]
+      operationId: getOrderById
+      summary: Pedido com itens. Eixo do experimento N+1 vs join.
+      parameters:
+        - $ref: '#/components/parameters/PathId'
+      responses:
+        '200':
+          description: Pedido detalhado
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/OrderDetail' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /v1/customers/{id}/orders:
+    get:
+      tags: [orders]
+      operationId: listCustomerOrders
+      parameters:
+        - $ref: '#/components/parameters/PathId'
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: Página de resumos de pedido
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/OrderSummaryPage' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /v1/orders:
+    post:
+      tags: [orders]
+      operationId: createOrder
+      summary: |
+        Transação: trava produtos em ordem crescente de id, valida estoque,
+        insere pedido e itens, decrementa estoque. Idempotente por chave.
+      parameters:
+        - name: Idempotency-Key
+          in: header
+          required: true
+          schema: { type: string, minLength: 1, maxLength: 128 }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateOrderRequest' }
+      responses:
+        '201':
+          description: |
+            Pedido criado. Em replay idempotente o corpo é idêntico ao
+            original e o cabeçalho Idempotency-Replayed vem como "true".
+          headers:
+            Idempotency-Replayed:
+              description: Presente apenas em replay.
+              required: false
+              schema: { type: string, enum: ["true"] }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/OrderDetail' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409':
+          description: Estoque insuficiente ou conflito de chave de idempotência.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/Problem' }
+
+  /noop:
+    get:
+      tags: [operational]
+      operationId: noop
+      summary: Calibração do gerador de carga. Exatamente 11 bytes, sem tocar o banco.
+      responses:
+        '200':
+          description: '{"ok":true}'
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [ok]
+                properties:
+                  ok: { type: boolean, const: true }
+                additionalProperties: false
+
+  /healthz:
+    get:
+      tags: [operational]
+      operationId: healthz
+      summary: Liveness. Não toca o banco.
+      responses:
+        '200': { description: Vivo }
+
+  /readyz:
+    get:
+      tags: [operational]
+      operationId: readyz
+      summary: Readiness. Verifica que o backend de dados responde.
+      responses:
+        '200': { description: Pronto }
+        '503':
+          description: Backend de dados indisponível.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/Problem' }
+
+  /metrics:
+    get:
+      tags: [operational]
+      operationId: metrics
+      summary: Exposição Prometheus. Nomes fixados em specs/api/telemetry.md.
+      responses:
+        '200':
+          description: Métricas
+          content:
+            text/plain: {}
+
+components:
+  parameters:
+    PathId:
+      name: id
+      in: path
+      required: true
+      schema: { type: integer, format: int64, minimum: 1 }
+    Cursor:
+      name: cursor
+      in: query
+      required: false
+      description: |
+        base64url sem padding de "<created_at_em_milissegundos>:<id>".
+        Opaco para o cliente e portável entre implementações.
+      schema: { type: string, maxLength: 64 }
+    Limit:
+      name: limit
+      in: query
+      required: false
+      schema: { type: integer, minimum: 1, maximum: 100, default: 20 }
+
+  responses:
+    BadRequest:
+      description: Parâmetro ou corpo inválido.
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/Problem' }
+    NotFound:
+      description: Recurso inexistente.
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/Problem' }
+
+  schemas:
+    Timestamp:
+      type: string
+      format: date-time
+      description: |
+        RFC 3339 em UTC com precisão de exatamente milissegundos e sufixo Z.
+        Truncar é obrigação da implementação.
+      pattern: '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$'
+      examples: ["2026-08-21T14:03:11.482Z"]
+
+    Product:
+      type: object
+      required: [id, sku, name, price_cents, stock, category_id, attrs, created_at]
+      additionalProperties: false
+      properties:
+        id: { type: integer, format: int64 }
+        sku: { type: string, maxLength: 32 }
+        name: { type: string, maxLength: 200 }
+        price_cents: { type: integer, minimum: 0 }
+        stock: { type: integer, minimum: 0 }
+        category_id: { type: integer, format: int64 }
+        attrs:
+          type: object
+          description: Objeto plano, 3 a 8 chaves, valores string. Repassado verbatim.
+          additionalProperties: { type: string }
+        created_at: { $ref: '#/components/schemas/Timestamp' }
+
+    ProductPage:
+      type: object
+      required: [items, next_cursor, has_more]
+      additionalProperties: false
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/Product' }
+        next_cursor:
+          type: [string, "null"]
+        has_more: { type: boolean }
+
+    OrderStatus:
+      type: string
+      enum: [pending, paid, shipped, cancelled]
+
+    OrderItem:
+      type: object
+      required: [product_id, sku, name, qty, unit_price_cents]
+      additionalProperties: false
+      properties:
+        product_id: { type: integer, format: int64 }
+        sku: { type: string, maxLength: 32 }
+        name: { type: string, maxLength: 200 }
+        qty: { type: integer, minimum: 1 }
+        unit_price_cents:
+          type: integer
+          minimum: 0
+          description: Snapshot do preço no instante do pedido.
+
+    OrderDetail:
+      type: object
+      required: [id, customer_id, status, total_cents, created_at, items]
+      additionalProperties: false
+      properties:
+        id: { type: integer, format: int64 }
+        customer_id: { type: integer, format: int64 }
+        status: { $ref: '#/components/schemas/OrderStatus' }
+        total_cents:
+          type: integer
+          minimum: 0
+          description: Derivado. Soma de qty * unit_price_cents.
+        created_at: { $ref: '#/components/schemas/Timestamp' }
+        items:
+          type: array
+          minItems: 1
+          items: { $ref: '#/components/schemas/OrderItem' }
+
+    OrderSummary:
+      type: object
+      required: [id, customer_id, status, total_cents, item_count, created_at]
+      additionalProperties: false
+      properties:
+        id: { type: integer, format: int64 }
+        customer_id: { type: integer, format: int64 }
+        status: { $ref: '#/components/schemas/OrderStatus' }
+        total_cents: { type: integer, minimum: 0 }
+        item_count: { type: integer, minimum: 1 }
+        created_at: { $ref: '#/components/schemas/Timestamp' }
+
+    OrderSummaryPage:
+      type: object
+      required: [items, next_cursor, has_more]
+      additionalProperties: false
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/OrderSummary' }
+        next_cursor:
+          type: [string, "null"]
+        has_more: { type: boolean }
+
+    CreateOrderRequest:
+      type: object
+      required: [customer_id, items]
+      additionalProperties: false
+      properties:
+        customer_id: { type: integer, format: int64, minimum: 1 }
+        items:
+          type: array
+          minItems: 1
+          maxItems: 20
+          items:
+            type: object
+            required: [product_id, qty]
+            additionalProperties: false
+            properties:
+              product_id: { type: integer, format: int64, minimum: 1 }
+              qty: { type: integer, minimum: 1, maximum: 100 }
+
+    Problem:
+      type: object
+      description: RFC 9457. Catálogo fechado em specs/reference-domain/contract.md.
+      required: [type, title, status, detail, instance]
+      additionalProperties: false
+      properties:
+        type:
+          type: string
+          enum:
+            - "urn:lab:validation"
+            - "urn:lab:not-found"
+            - "urn:lab:insufficient-stock"
+            - "urn:lab:idempotency-conflict"
+            - "urn:lab:not-ready"
+            - "urn:lab:internal"
+        title:
+          type: string
+          enum:
+            - "Validation failed"
+            - "Not found"
+            - "Insufficient stock"
+            - "Idempotency key conflict"
+            - "Not ready"
+            - "Internal error"
+        status: { type: integer }
+        detail:
+          type: string
+          description: Gabarito exato por tipo. Não é texto livre.
+        instance:
+          type: string
+          description: Path da requisição.
