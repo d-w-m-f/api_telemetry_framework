@@ -26,13 +26,38 @@ Não define o protocolo pelo qual a aplicação chama essas intenções — isso
 | Intenção | Parâmetros | Retorno | Plano esperado |
 |---|---|---|---|
 | `get_product_by_id` | `id` | 0..1 produto | Index Scan `products_pkey` |
-| `list_products` | `category_id?`, `name_prefix?`, `cursor_created_at?`, `cursor_id?`, `limit` | 0..limit+1 produtos | Index Scan `idx_products_created_id` ou `idx_products_category_created` |
+| `list_products` | `cursor_created_at`, `cursor_id`, `limit` | 0..limit+1 produtos | Index Scan `idx_products_created_id` |
+| `list_products_by_category` | `category_id`, `cursor_*`, `limit` | 0..limit+1 produtos | Index Scan `idx_products_category_created` |
+| `list_products_by_name_prefix` | `pattern`, `cursor_*`, `limit` | 0..limit+1 produtos | Bitmap Index Scan `idx_products_name_prefix` + Sort |
+| `list_products_by_category_and_name_prefix` | `category_id`, `pattern`, `cursor_*`, `limit` | 0..limit+1 produtos | Bitmap Index Scan + Sort |
 | `get_order_header` | `order_id` | 0..1 pedido | Index Scan `orders_pkey` |
 | `list_order_items` | `order_id` | 1..N itens | Index Scan `order_items_pkey` |
 | `list_order_items_with_product` | `order_id` | 1..N itens + `sku`, `name` | Index Scan + Nested Loop em `products_pkey` |
 | `list_customer_orders` | `customer_id`, `cursor_created_at?`, `cursor_id?`, `limit` | 0..limit+1 resumos | Index Scan `idx_orders_customer_created` + agregação de `item_count` |
 | `customer_exists` | `customer_id` | booleano | Index Only Scan `customers_pkey` |
-| `find_order_by_idempotency_key` | `key` | 0..1 id de pedido | Index Scan `uq_orders_idempotency_key` |
+| `find_order_by_idempotency_key` | `key` | 0..1 cabeçalho de pedido | Index Scan `uq_orders_idempotency_key` |
+
+### Sem SQL dinâmico
+
+Quatro intenções de listagem em vez de uma com filtros opcionais. `WHERE ($1 IS
+NULL OR category_id = $1)` produz plano genérico e degrada para Seq Scan sem
+avisar — e SQL montado em tempo de execução quebra a garantia de texto idêntico
+entre linguagens. Quatro arquivos, quatro planos fixos, quatro asserções de
+`EXPLAIN`.
+
+O cursor não tem ramo condicional: **ausência de cursor é o sentinela
+`('infinity', 9223372036854775807)`**, o topo da ordenação `created_at DESC,
+id DESC`. O predicado `(created_at, id) < ($n, $m)` vale sempre, com ou sem
+cursor. `pattern` chega ao banco já em minúsculas e com `%` no fim; a aplicação
+monta, o SQL não concatena.
+
+### Replay idempotente custa duas queries
+
+`find_order_by_idempotency_key` devolve o cabeçalho; o corpo do replay se
+completa com `list_order_items_with_product`. Não há coluna guardando o corpo da
+requisição original: o conflito de chave é detectado comparando `customer_id` e o
+conjunto `(product_id, qty)` do pedido armazenado com o da requisição que chegou.
+Preço não entra na comparação — ele é snapshot e pode ter mudado desde então.
 
 **`limit + 1` é obrigatório** em toda paginação: busca-se uma linha a mais que o
 `limit` para decidir `has_more` sem uma segunda query. Implementação que faz

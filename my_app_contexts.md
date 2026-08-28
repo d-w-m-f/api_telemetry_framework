@@ -1,58 +1,15 @@
-# DDD — Orientação geral
 
-Spec normativa. Define o modelo estratégico do repositório: quais domínios
-existem, onde ficam suas fronteiras, que direção as dependências podem tomar e
-qual vocabulário é obrigatório.
+## 3. Mapa de contextos
 
-Toda spec de construção (`specs/api/`, `specs/languages/`, `specs/strategies/`)
-é subordinada a esta. Em caso de conflito, esta vence.
-
----
-
-## 1. A regra dos dois níveis
-
-Este repositório contém **dois** domínios em níveis diferentes. Confundi-los é o
-erro mais caro que se pode cometer aqui.
-
-**Nível meta — o Laboratório.** Experimentos, implementações, execuções,
-observações, resultados. É o produto. É aqui que DDD se aplica no sentido
-clássico: o domínio é descoberto, modelado, refinado, e as regras de negócio
-(o que torna um run *válido*, o que torna dois resultados *comparáveis*) são
-não triviais e mudam com o aprendizado.
-
-**Nível objeto — o Domínio de Referência.** Catálogo e pedidos, implementado por
-toda API sob teste. É um domínio real, mas exerce papel de **fixture**: ele é
-fixo por decreto, não descoberto por modelagem. Ninguém refina o Domínio de
-Referência para servir melhor ao negócio; ele existe para ser idêntico em todas
-as implementações.
-
-**Consequência normativa:**
-
-> DDD governa o Laboratório. Nas APIs sob teste, DDD é **medido**, não imposto.
-
-A arquitetura interna de uma API é uma variável do experimento
-(`minimal`, `ddd-layered`, `hexagonal` — ver `specs/strategies/`). Se todas as
-implementações fossem obrigatoriamente DDD em camadas, o benchmark mediria o
-custo do layering achando que mede o runtime — e esse custo não é igual entre
-linguagens. `minimal` é o piso de medição; as demais estratégias existem para
-que o custo de cada arquitetura interna vire resultado publicado.
-
----
-
-## 2. Mapa de contextos
-
-Oito contextos. Dois são núcleo, um é shared kernel, o resto é suporte.
-
-| Contexto | Tipo | Onde vive |
-|---|---|---|
-| Domínio de Referência | Shared Kernel | `api/`, `db/schema/`, `db/queries/`, `specs/reference-domain/` |
-| Fábrica de Implementações | Suporte | `specs/`, `.claude/`, `src/subjects/*/impl.yaml`, `conformance/` |
-| Backend de Dados | Suporte | `db/`, `src/lab/data/` |
-| Geração de Carga | Suporte | `bench/scenarios/`, `bench/profiles/`, `src/lab/load/` |
-| Telemetria | Suporte (e objeto de estudo) | `observability/`, `src/lab/telemetry/` |
-| **Experimentação** | **Núcleo** | `src/lab/experiment/`, `bench/matrix.yaml` |
-| **Resultados & Análise** | **Núcleo** | `src/lab/analysis/`, `results/` |
-| Portal | Apresentação | `src/portal/` |
+| Nome | Descrição | Tipo | Onde vive |
+|---|---|---|---|
+| referencia | Domínio de Referência | Shared Kernel | `api/`, `db/schema/`, `db/queries/`, `specs/reference-domain/` |
+| backend-database | Banco de Dados & Dados | Suporte | `db/`, `src/lab/data/` |
+| stress | Geração de Carga | Suporte | `bench/scenarios/`, `bench/profiles/`, `src/lab/load/` |
+| telemetry | Telemetria | Suporte (e objeto de estudo) | `observability/`, `src/lab/telemetry/` |
+| experimentation | **Experimentação** | **Núcleo** | `src/lab/experiment/`, `bench/matrix.yaml` |
+| analytics | **Resultados & Análise** | **Núcleo** | `src/lab/analysis/`, `results/` |
+| view | Interface de apresentação | Apresentação | `src/portal/` |
 
 ### 2.1 Domínio de Referência (Shared Kernel)
 
@@ -80,30 +37,6 @@ de serialização muda, os bytes no socket mudam, o p99 muda. As duas noções d
 compatibilidade não são a mesma, e confundi-las é como se produz folclore. Toda
 tabela comparativa é de uma única `contract_version` — não existe convergência
 gradual em que resultados de duas versões coexistam.
-
-### 2.2 Fábrica de Implementações
-
-Linguagem ubíqua: `Implementação`, `Linguagem`, `Framework`, `Estratégia`,
-`Spec`, `Manifesto`, `Conformidade`, `Capacidade`.
-
-Agregado raiz: **`Implementação`**, identificada por `<linguagem>/<framework>/<estratégia>`
-— por exemplo `go/http/minimal`, `python/fastapi/join-unico`. Essa tripla é o
-"nome pra profilar": ela aparece em resultados, gráficos e comparações.
-
-A `Estratégia` é um eixo **nomeado e transversal às linguagens**, nunca um
-ordinal opaco. `go/http/join-unico` e `python/fastapi/join-unico` implementam a
-mesma spec de estratégia; é isso que torna a matriz da Fase 2 comparável.
-
-Cada implementação carrega um `impl.yaml` declarando: specs aplicadas, versão de
-contrato alvo, knobs suportados, capacidades opcionais (shedding, cancelamento,
-cache) e status de conformidade.
-
-Invariantes:
-
-- Uma `Implementação` sem conformidade verde **na versão vigente do contrato**
-  não é elegível para nenhum `Experimento`.
-- Uma `Implementação` não conhece Experimento, Carga, Telemetria ou Resultado.
-  Ela conhece o Contrato e o Harness Contract, e nada mais.
 
 ### 2.3 Backend de Dados
 

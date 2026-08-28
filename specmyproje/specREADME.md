@@ -19,6 +19,10 @@ medição produz número indefensável. Ver `specs/DDD/general.md §5`.
 Toda spec abre com frontmatter e contém as cinco seções abaixo, nesta ordem.
 Agente que encontrar spec fora deste formato deve parar e reportar.
 
+Único isento: este arquivo. Ele **define** o formato, então não pode se
+descrever nos próprios termos sem circularidade. Qualquer outra spec sem
+frontmatter é bug.
+
 ```yaml
 ---
 id: strategies/join-unico
@@ -85,12 +89,12 @@ O que hoje varia, e onde cada variação é definida:
 |---|---|---|
 | Linguagem | `go`, `typescript`, `java`, `python` | `languages/` |
 | Framework | `http`, `gin` / `fastify` / `spring` / `fastapi` | `frameworks/` |
-| Estratégia | `minimal`, `ddd-layered`, `hexagonal`, `n-mais-1`, `cache-aside`, `optimistic-stock` | `strategies/` |
-| Engine | `postgres` (+ futuros) | `engines/` |
+| Estratégia | `default`, `cached-redis` |
+| DB Engine | `postgres` (+ futuros) | `engines/` |
 | Nível de telemetria | `off`, `metrics`, `traces@1%`, `traces@100%` | knob do Experimento |
-| Perfil de dataset | `small`, `large` | Backend de Dados |
+| Perfil de dataset | `tamanho dos payloads`, `quantidade de payloads`  |
 | Perfil de carga | `read_point`, `read_heavy`, `mixed`, `write_contended`, `slow_tail`, `burst` | Geração de Carga |
-| Orçamento | cpus, memória, cpuset | Experimentação |
+| Orçamento (Recurso Dockerizado) | cpus, memória, cpuset |
 
 Os quatro primeiros compõem a identidade de um sujeito e materializam-se em
 disco como `src/subjects/<linguagem>/<framework>/<estrategia>/`. Os quatro
