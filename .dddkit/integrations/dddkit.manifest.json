@@ -1,0 +1,9 @@
+{
+  "integration": "speckit",
+  "version": "1.0.1",
+  "installed_at": "2026-08-28T07:27:28.901394+00:00",
+  "files": {
+    ".specify/scripts/python/setup_plan.py": "272d106ce8e5325dd6f4e741f6a5efd1bb0290f415b448fecc8d877d606d321b",
+    ".dddkit/scripts/python/": ""
+  }
+}
