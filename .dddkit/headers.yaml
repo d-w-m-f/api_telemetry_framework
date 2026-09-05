@@ -1,0 +1,87 @@
+# DDD-Kit frontmatter contract.
+#
+# Defines the required/optional frontmatter fields for every document type in
+# the framework. This is the machine-readable counterpart to DDD.md section 2
+# ("Spec Markdown Structure"). Scripts (validate-ddd.py) and future skills
+# should treat this file as the schema to check frontmatter against, instead
+# of hardcoding field lists.
+version: 1
+
+doc_types:
+
+  ddd-constitution:
+    filename: DDD.md
+    location: .dddkit/DDD.md
+    fields:
+      id: {type: string, required: true, example: META-DDD-CONST-01}
+      filename: {type: string, required: true}
+      version: {type: semver, required: true}
+      status: {type: enum, values: [draft, review, approved, deprecated], required: true}
+      domain_type: {type: enum, values: [meta], required: true}
+
+  shared-language:
+    filename: shared_language.md
+    location: .dddkit/shared_language.md
+    fields:
+      id: {type: string, required: true, example: META-UBIQUITOUS-01}
+      filename: {type: string, required: true}
+      version: {type: semver, required: true}
+      status: {type: enum, values: [draft, review, approved, deprecated], required: true}
+
+  context-map:
+    filename: contexts.md
+    location: specs/BoundedContexts/contexts.md
+    fields:
+      id: {type: string, required: true, example: META-CONTEXTS-01}
+      filename: {type: string, required: true}
+      version: {type: semver, required: true}
+      status: {type: enum, values: [draft, review, approved, deprecated], required: true}
+      domain_type: {type: enum, values: [meta], required: true}
+
+  domain:
+    filename: domain.md
+    location: "specs/BoundedContexts/**/domain.md"
+    description: >
+      Domain modeling for one module ("what"). Never carries a code pointer -
+      that lives in the sibling repomap.md.
+    fields:
+      uuid: {type: uuid, required: true, immutable: true, description: "Generated once at scaffold time by scaffold-context.py; never reassigned."}
+      filename: {type: string, required: true}
+      version: {type: semver, required: true}
+      status: {type: enum, values: [draft, review, approved, deprecated], required: true}
+      bounded_context: {type: string, required: true, description: "PascalCase name of the owning Bounded Context."}
+      module: {type: string, required: true, description: "kebab-case module name."}
+
+  vocabulary:
+    filename: vocabulary.md
+    location: "specs/BoundedContexts/**/vocabulary.md"
+    fields:
+      implements_uuid: {type: uuid, required: true, description: "Same uuid as the sibling domain.md."}
+      filename: {type: string, required: true}
+      version: {type: semver, required: true}
+      status: {type: enum, values: [draft, review, approved, deprecated], required: true}
+
+  repomap:
+    filename: repomap.md
+    location: "specs/BoundedContexts/**/repomap.md"
+    description: >
+      Maps a module to its real source-code location ("where"). Owns the
+      code pointer that used to live in domain.md's implemented_in field.
+    fields:
+      implements_uuid: {type: uuid, required: true, description: "Same uuid as the sibling domain.md."}
+      filename: {type: string, required: true}
+      version: {type: semver, required: true}
+      status: {type: enum, values: [draft, review, approved, deprecated], required: true}
+      module_kind: {type: enum, values: [folder, file], required: true}
+      code_glob: {type: glob, required: true, example: "src/**/catalog/"}
+
+  regra-de-negocio:
+    filename: regra-de-negocio.md
+    location: "<code_glob resolution>/regra-de-negocio.md (folder modules) or <code_glob resolution>/<module-file-name>.md (file modules)"
+    description: >
+      Lives with the source code, not under specs/. Fine-grained business
+      rules, data flows, validations, and edge cases for the module.
+    fields:
+      implements_uuid: {type: uuid, required: true, description: "Same uuid as the domain.md/repomap.md pair this file documents."}
+      version: {type: semver, required: true}
+      status: {type: enum, values: [draft, review, approved, deprecated], required: true}

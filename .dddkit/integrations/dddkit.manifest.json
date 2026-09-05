@@ -1,9 +1,21 @@
 {
-  "integration": "speckit",
-  "version": "1.0.1",
-  "installed_at": "2026-08-28T07:27:28.901394+00:00",
+  "integration": "dddkit",
+  "version": "1.0.0",
+  "installed_at": "2026-09-05T10:20:58.481272+00:00",
   "files": {
-    ".specify/scripts/python/setup_plan.py": "272d106ce8e5325dd6f4e741f6a5efd1bb0290f415b448fecc8d877d606d321b",
-    ".dddkit/scripts/python/": ""
+    ".dddkit/DDD.md": "1a6499b1313ec8756f8024de083ccb68df010f060435c2e402824f763b8e4531",
+    ".dddkit/headers.yaml": "06f138202928b6c20857986e90da309aecc99ccbe35b85c2c978cce1352f907b",
+    ".dddkit/integrations/claude.manifest.json": "63b628af08e2c53e3f596bc1e0f2110a4226642f163981125064d3a90f66876f",
+    ".dddkit/scripts/_common.py": "571143ee8aea57293a5c8ef9930273d27dcd2eda38bf5dd169aa0c6a78822824",
+    ".dddkit/scripts/build-index.py": "1e34d67b440bf5010b464910f713e2181842c40a90d1b23f34b73dbe671c793e",
+    ".dddkit/scripts/generate-manifest.py": "9b26902e5a272ff72fcde58d2df0390bbfcbf8c915fadae6419c6e8e3b05805a",
+    ".dddkit/scripts/scaffold-context.py": "3dbdeb0a521cd01ef7ed484179f9f9116bf3b3ddd9bb6801228f5c9e6513f5a1",
+    ".dddkit/scripts/validate-ddd.py": "3647440feeeb1fa9ea23b0c8de3f72f4a7efeb14f3a7e06ab61a2e8b81addbee",
+    ".dddkit/shared_language.md": "0fa007e3b6500887d8c4f78ec1e8a1a8d61d683a556a2da35c0341bf3cd005f1",
+    ".dddkit/templates/context-map.md": "c1ae8c88c197b31f92192857a29ce9d245bf418eb600bbd235d9536dafaa9016",
+    ".dddkit/templates/domain-template.md": "a50ca4328dff33c3f0803a5d8edb47517e2e8aa0638e7669afece0206f218bc1",
+    ".dddkit/templates/regra-de-negocio-template.md": "568f3ea90094ddec26fbb320ceb6fac38b8edf2c47432538825056843621ca10",
+    ".dddkit/templates/repomap-template.md": "51d02bbe8de28583908d6e76449d4df28d22586ff58291e17c8ad46a784af504",
+    ".dddkit/templates/vocabulary-template.md": "07635ef143f23e4a6f06084279fbd66c00e70ae50d739bcdb86780cdf0067364"
   }
 }

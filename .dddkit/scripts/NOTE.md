@@ -1,3 +1,6 @@
-Essa nota é pra contexto apenas, nao faz parte da estrutura do dddkit
+This note is context only, not part of the dddkit structure.
 
-EU nao sei se esses scripts ainda seram usados, ou se são legados agora
+Resolved: these scripts are actively used. `scaffold-context.py` and `validate-ddd.py`
+were fixed (project-root resolution was broken after the move to `.dddkit/scripts/`)
+and extended; `build-index.py` and `generate-manifest.py` were added. See DDD.md
+section 3 for how they fit together.

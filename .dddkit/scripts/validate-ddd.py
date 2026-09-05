@@ -1,83 +1,227 @@
-import os
-import sys
-import glob
+#!/usr/bin/env python3
+"""DDD-Kit SdSFC + structure linter.
+
+Checks (see DDD.md section 3-4 and workflow.md's linter memorandum):
+  1. .dddkit/index.json is not stale relative to the real domain.md/repomap.md files.
+  2. Every module's business-rule file exists at the location repomap.md points at,
+     and module_kind matches what is actually on disk.
+  3. Every context-map.md entry has a matching folder under BoundedContexts/, and
+     every such folder is named in context-map.md (no orphans either direction).
+  4. Every file listed in .dddkit/integrations/dddkit.manifest.json still matches
+     its recorded sha256 hash.
+"""
+
+import hashlib
+import json
 import re
-from pathlib import Path
+import sys
 
-def get_project_root():
-    """Assumes this script is in specs/DDD-Kit/scripts/"""
-    script_path = Path(__file__).resolve()
-    return script_path.parent.parent.parent.parent
+from _common import get_project_root, parse_frontmatter, find_module_dirs
 
-def find_domain_files(specs_dir):
-    return glob.glob(str(specs_dir / "BoundedContexts" / "**" / "domain.md"), recursive=True)
+CONTEXT_NAME_RE = re.compile(r"`([A-Z][A-Za-z0-9]*)`")
 
-def extract_implemented_in(filepath):
-    with open(filepath, 'r', encoding='utf-8') as f:
-        content = f.read()
-    
-    # Busca por implemented_in: <wildcard> no header
-    match = re.search(r'^implemented_in:\s*(.+)$', content, re.MULTILINE)
-    if match:
-        val = match.group(1).strip()
-        # Remove eventuais aspas
-        if val.startswith(('"', "'")) and val.endswith(('"', "'")):
-            val = val[1:-1]
-        return val
-    return None
 
-def validate():
-    root_dir = get_project_root()
-    specs_dir = root_dir / "specs" / "DDD-Kit"
-    
-    domain_files = find_domain_files(specs_dir)
-    if not domain_files:
-        print("⚠️ Nenhum arquivo domain.md encontrado em specs/DDD-Kit/BoundedContexts/")
-        return 0
-        
+def sha256_of(path):
+    digest = hashlib.sha256()
+    digest.update(path.read_bytes())
+    return digest.hexdigest()
+
+
+def check_index_freshness(root, specs_dir):
+    print("\n=== 1. Index freshness (.dddkit/index.json) ===")
+    index_path = root / ".dddkit" / "index.json"
     errors = 0
-    
-    for df in domain_files:
-        rel_df = Path(df).relative_to(root_dir)
-        print(f"🔍 Analisando: {rel_df}")
-        
-        wildcard = extract_implemented_in(df)
-        if not wildcard or "WILDCARD_EXATO" in wildcard:
-            print(f"   ❌ ERRO: 'implemented_in' não definido ou inválido no header.")
+
+    if not index_path.is_file():
+        print("ERROR: .dddkit/index.json does not exist. Run .dddkit/scripts/build-index.py.")
+        return 1
+
+    try:
+        index = json.loads(index_path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+        print(f"ERROR: could not parse .dddkit/index.json: {exc}")
+        return 1
+
+    seen_uuids = set()
+    for module_dir in find_module_dirs(specs_dir):
+        rel_module_dir = str(module_dir.relative_to(root))
+        domain_fields = parse_frontmatter(module_dir / "domain.md")
+        module_uuid = domain_fields.get("uuid")
+
+        if not module_uuid or module_uuid.startswith("["):
+            print(f"ERROR: {rel_module_dir}/domain.md has no resolved 'uuid'.")
             errors += 1
             continue
-            
-        print(f"   Wildcard de implementação: {wildcard}")
-        
-        # Resolve o wildcard a partir da raiz do projeto
-        search_pattern = str(root_dir / wildcard)
-        matched_dirs = glob.glob(search_pattern, recursive=True)
-        
-        # Filtra apenas diretórios
-        matched_dirs = [d for d in matched_dirs if os.path.isdir(d)]
-        
-        if not matched_dirs:
-            print(f"   ❌ ERRO: Wildcard '{wildcard}' não encontrou nenhum diretório no código fonte.")
+
+        seen_uuids.add(module_uuid)
+        entry = index.get(module_uuid)
+        if entry is None:
+            print(f"ERROR: {rel_module_dir} (uuid {module_uuid}) is missing from index.json. Rebuild the index.")
+            errors += 1
+        elif entry.get("spec_path") != rel_module_dir:
+            print(f"ERROR: index.json has stale spec_path for uuid {module_uuid}: "
+                  f"indexed '{entry.get('spec_path')}', actual '{rel_module_dir}'. Rebuild the index.")
+            errors += 1
+        else:
+            print(f"OK: {rel_module_dir} indexed correctly.")
+
+    for indexed_uuid in index:
+        if indexed_uuid not in seen_uuids:
+            print(f"ERROR: index.json has an orphaned entry for uuid {indexed_uuid} "
+                  f"(spec_path '{index[indexed_uuid].get('spec_path')}') with no matching domain.md. Rebuild the index.")
+            errors += 1
+
+    return errors
+
+
+def check_sdsfc(root, specs_dir):
+    print("\n=== 2. SdSFC (business-rule file next to the code) ===")
+    module_dirs = list(find_module_dirs(specs_dir))
+    if not module_dirs:
+        print("No domain.md files found under specs/BoundedContexts/. Nothing to check.")
+        return 0
+
+    errors = 0
+    for module_dir in module_dirs:
+        rel_module_dir = module_dir.relative_to(root)
+        repomap_file = module_dir / "repomap.md"
+        print(f"Checking: {rel_module_dir}")
+
+        if not repomap_file.is_file():
+            print(f"   ERROR: missing repomap.md (required to locate the code for this module).")
             errors += 1
             continue
-            
-        # Para cada diretório encontrado, verifica se tem regra-de-negocio.md
-        for d in matched_dirs:
-            rel_dir = Path(d).relative_to(root_dir)
-            rule_file = Path(d) / "regra-de-negocio.md"
-            if rule_file.exists():
-                print(f"   ✅ OK (SdSFC respeitado): {rel_dir}/regra-de-negocio.md encontrado.")
-            else:
-                print(f"   ❌ ERRO SdSFC: O diretório {rel_dir} não possui regra-de-negocio.md!")
-                errors += 1
-                
-    if errors > 0:
-        print(f"\n❌ Validação Falhou. Encontrados {errors} erro(s) de SdSFC.")
+
+        fields = parse_frontmatter(repomap_file)
+        code_glob = fields.get("code_glob")
+        module_kind = fields.get("module_kind")
+
+        if not code_glob or code_glob.startswith("["):
+            print(f"   ERROR: repomap.md has no resolved 'code_glob'.")
+            errors += 1
+            continue
+        if module_kind not in ("folder", "file"):
+            print(f"   ERROR: repomap.md 'module_kind' must be 'folder' or 'file', got '{module_kind}'.")
+            errors += 1
+            continue
+
+        matches = [p for p in root.glob(code_glob) if p.exists()]
+        if not matches:
+            print(f"   ERROR: code_glob '{code_glob}' matched nothing in the source tree.")
+            errors += 1
+            continue
+        if len(matches) > 1:
+            print(f"   ERROR: code_glob '{code_glob}' matched {len(matches)} paths; it must resolve to exactly one.")
+            errors += 1
+            continue
+
+        code_path = matches[0]
+        actual_kind = "folder" if code_path.is_dir() else "file"
+        if actual_kind != module_kind:
+            print(f"   ERROR: repomap.md says module_kind '{module_kind}' but '{code_path}' is a {actual_kind}.")
+            errors += 1
+            continue
+
+        if module_kind == "folder":
+            rule_file = code_path / "regra-de-negocio.md"
+        else:
+            rule_file = code_path.with_suffix(".md")
+
+        if rule_file.exists():
+            print(f"   OK: {rule_file.relative_to(root)} found.")
+        else:
+            print(f"   ERROR: expected business-rule file not found at {rule_file.relative_to(root)}.")
+            errors += 1
+
+    return errors
+
+
+def check_context_map(root, specs_dir):
+    print("\n=== 3. context-map.md <-> BoundedContexts/ folders ===")
+    context_map_file = specs_dir / "BoundedContexts" / "contexts.md"
+    bounded_contexts_dir = specs_dir / "BoundedContexts"
+    errors = 0
+
+    if not context_map_file.is_file():
+        print(f"ERROR: {context_map_file.relative_to(root)} not found.")
+        return 1
+
+    mapped_names = set(CONTEXT_NAME_RE.findall(context_map_file.read_text(encoding="utf-8")))
+    if not mapped_names:
+        print(f"ERROR: no backtick-wrapped PascalCase Bounded Context names found in {context_map_file.relative_to(root)}.")
+        errors += 1
+
+    actual_names = {
+        p.name for p in bounded_contexts_dir.iterdir()
+        if p.is_dir() and re.fullmatch(r"[A-Z][A-Za-z0-9]*", p.name)
+    }
+
+    for name in sorted(mapped_names - actual_names):
+        print(f"ERROR: '{name}' is named in contexts.md but has no folder at specs/BoundedContexts/{name}/.")
+        errors += 1
+    for name in sorted(actual_names - mapped_names):
+        print(f"ERROR: specs/BoundedContexts/{name}/ exists but '{name}' is not named in contexts.md.")
+        errors += 1
+
+    if not errors:
+        print(f"OK: {len(actual_names)} Bounded Context(s) match between contexts.md and the filesystem.")
+
+    return errors
+
+
+def check_manifest(root):
+    print("\n=== 4. dddkit.manifest.json integrity ===")
+    manifest_path = root / ".dddkit" / "integrations" / "dddkit.manifest.json"
+    errors = 0
+
+    if not manifest_path.is_file():
+        print(f"ERROR: {manifest_path.relative_to(root)} not found. Run .dddkit/scripts/generate-manifest.py.")
+        return 1
+
+    try:
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+        print(f"ERROR: could not parse {manifest_path.relative_to(root)}: {exc}")
+        return 1
+
+    files = manifest.get("files", {})
+    if not files:
+        print("WARNING: manifest has no files listed.")
+
+    for rel_path, expected_hash in files.items():
+        path = root / rel_path
+        if not path.is_file():
+            print(f"ERROR: manifest lists '{rel_path}' but it no longer exists.")
+            errors += 1
+            continue
+        actual_hash = sha256_of(path)
+        if actual_hash != expected_hash:
+            print(f"ERROR: '{rel_path}' hash mismatch (manifest is stale or the file was modified without regenerating it).")
+            errors += 1
+        else:
+            print(f"OK: {rel_path}")
+
+    return errors
+
+
+def main():
+    print("=== DDD-Kit Linter ===")
+    root = get_project_root()
+    specs_dir = root / "specs"
+
+    total_errors = 0
+    total_errors += check_index_freshness(root, specs_dir)
+    total_errors += check_sdsfc(root, specs_dir)
+    total_errors += check_context_map(root, specs_dir)
+    total_errors += check_manifest(root)
+
+    if total_errors:
+        print(f"\nValidation FAILED with {total_errors} error(s).")
         sys.exit(1)
     else:
-        print(f"\n✅ Validação de SdSFC Passou! A documentação está sincronizada com o código.")
+        print("\nValidation PASSED. Specs are in sync with the codebase.")
         sys.exit(0)
 
+
 if __name__ == "__main__":
-    print("=== DDD-Kit SdSFC Linter ===")
-    validate()
+    main()
