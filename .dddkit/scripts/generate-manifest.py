@@ -21,7 +21,9 @@ import json
 from _common import get_project_root
 
 EXCLUDED_NAMES = {"NOTE.md", "index.json", "__pycache__"}
-EXCLUDED_DIR_NAMES = {"__pycache__"}
+# "target" is the Rust linter's build output: regenerated artifacts, not
+# framework source. Its src/ and Cargo.toml/Cargo.lock are hashed as normal.
+EXCLUDED_DIR_NAMES = {"__pycache__", "target"}
 
 
 def sha256_of(path):
