@@ -5,7 +5,7 @@
 # ("Spec Markdown Structure"). Scripts (validate-ddd.py) and future skills
 # should treat this file as the schema to check frontmatter against, instead
 # of hardcoding field lists.
-version: 1
+version: 2
 
 doc_types:
 
@@ -75,9 +75,9 @@ doc_types:
       module_kind: {type: enum, values: [folder, file], required: true}
       code_glob: {type: glob, required: true, example: "src/**/catalog/"}
 
-  regra-de-negocio:
-    filename: regra-de-negocio.md
-    location: "<code_glob resolution>/regra-de-negocio.md (folder modules) or <code_glob resolution>/<module-file-name>.md (file modules)"
+  business-rules:
+    filename: business-rules.md
+    location: "<code_glob resolution>/business-rules.md (folder modules) or <code_glob resolution>/<module-file-name>.md (file modules)"
     description: >
       Lives with the source code, not under specs/. Fine-grained business
       rules, data flows, validations, and edge cases for the module.
@@ -85,3 +85,92 @@ doc_types:
       implements_uuid: {type: uuid, required: true, description: "Same uuid as the domain.md/repomap.md pair this file documents."}
       version: {type: semver, required: true}
       status: {type: enum, values: [draft, review, approved, deprecated], required: true}
+
+  plan:
+    filename: plan.md
+    location: "specs/BoundedContexts/**/plan.md"
+    description: >
+      Technical implementation plan for one module, produced by
+      /plan-context. Also the point where repomap.md's code_glob/module_kind
+      get finalized.
+    fields:
+      implements_uuid: {type: uuid, required: true, description: "Same uuid as the sibling domain.md."}
+      filename: {type: string, required: true}
+      version: {type: semver, required: true}
+      status: {type: enum, values: [draft, review, approved, deprecated], required: true}
+
+  tasks:
+    filename: tasks.md
+    location: "specs/BoundedContexts/**/tasks.md"
+    description: >
+      Ordered, dependency-aware task breakdown for one module, produced by
+      /generate-tasks. Organized by Aggregate (from domain.md), not by user
+      story.
+    fields:
+      implements_uuid: {type: uuid, required: true, description: "Same uuid as the sibling domain.md."}
+      filename: {type: string, required: true}
+      version: {type: semver, required: true}
+      status: {type: enum, values: [draft, review, approved, deprecated], required: true}
+
+  roadmap:
+    filename: roadmap.md
+    location: "specs/BoundedContexts/**/roadmap.md"
+    description: >
+      Optional phase-grouping index over tasks.md, created by /implement
+      only when a module's tasks.md needs more than one /implement session.
+    fields:
+      implements_uuid: {type: uuid, required: true, description: "Same uuid as the sibling domain.md."}
+      filename: {type: string, required: true}
+      version: {type: semver, required: true}
+      status: {type: enum, values: [draft, review, approved, deprecated], required: true}
+
+  interview:
+    filename: interview.md
+    location: specs/brainstorm/interview.md
+    description: >
+      Free-form capture of what the user wants to build, produced by
+      /interview. Grows by appending dated rounds, never by rewriting prior
+      answers away.
+    fields:
+      filename: {type: string, required: true}
+      version: {type: semver, required: true}
+      status: {type: enum, values: [draft, review, approved, deprecated], required: true}
+
+  requirements:
+    filename: requirements.md
+    location: specs/brainstorm/requirements.md
+    description: >
+      Functional/non-functional requirements produced by /map-requirements,
+      structured and testable (unlike interview.md's free-form capture).
+    fields:
+      filename: {type: string, required: true}
+      version: {type: semver, required: true}
+      status: {type: enum, values: [draft, review, approved, deprecated], required: true}
+
+  checklist:
+    filename: "<name>.md"
+    location: >
+      specs/BoundedContexts/**/<module>/checklists/<name>.md (module-scoped)
+      or specs/checklists/<name>.md (project-wide artifacts)
+    description: >
+      Reviewer-owned, on-demand quality gate produced by /checklist. A
+      module or project artifact can accumulate several named checklists.
+    fields:
+      filename: {type: string, required: true}
+      version: {type: semver, required: true}
+      status: {type: enum, values: [draft, review, approved, deprecated], required: true}
+
+  project-constitution:
+    filename: Constitution.md
+    location: specs/Constitution.md
+    description: >
+      The project's own engineering principles, distinct from
+      .dddkit/DDD.md (the framework's fixed DDD-modeling constitution).
+      Seeded once by /map-requirements, amended thereafter only by
+      /constitution.
+    fields:
+      filename: {type: string, required: true}
+      version: {type: semver, required: true}
+      status: {type: enum, values: [draft, review, approved, deprecated], required: true}
+      ratified: {type: date, required: false, description: "Original adoption date, ISO 8601. Use TODO(RATIFICATION_DATE) in the body if unknown."}
+      last_amended: {type: date, required: true}

@@ -9,6 +9,8 @@ Checks (see DDD.md section 3-4 and workflow.md's linter memorandum):
      every such folder is named in context-map.md (no orphans either direction).
   4. Every file listed in .dddkit/integrations/dddkit.manifest.json still matches
      its recorded sha256 hash.
+  5. Same as (4), for .dddkit/integrations/claude.manifest.json (the dddkit-owned
+     skill files under .claude/skills/).
 """
 
 import hashlib
@@ -123,7 +125,7 @@ def check_sdsfc(root, specs_dir):
             continue
 
         if module_kind == "folder":
-            rule_file = code_path / "regra-de-negocio.md"
+            rule_file = code_path / "business-rules.md"
         else:
             rule_file = code_path.with_suffix(".md")
 
@@ -169,13 +171,13 @@ def check_context_map(root, specs_dir):
     return errors
 
 
-def check_manifest(root):
-    print("\n=== 4. dddkit.manifest.json integrity ===")
-    manifest_path = root / ".dddkit" / "integrations" / "dddkit.manifest.json"
+def check_manifest(root, manifest_name, section_label):
+    print(f"\n=== {section_label} ===")
+    manifest_path = root / ".dddkit" / "integrations" / manifest_name
     errors = 0
 
     if not manifest_path.is_file():
-        print(f"ERROR: {manifest_path.relative_to(root)} not found. Run .dddkit/scripts/generate-manifest.py.")
+        print(f"ERROR: {manifest_path.relative_to(root)} not found. Run .dddkit/scripts/generate-manifest.py --target {manifest_name.split('.')[0]}.")
         return 1
 
     try:
@@ -213,7 +215,8 @@ def main():
     total_errors += check_index_freshness(root, specs_dir)
     total_errors += check_sdsfc(root, specs_dir)
     total_errors += check_context_map(root, specs_dir)
-    total_errors += check_manifest(root)
+    total_errors += check_manifest(root, "dddkit.manifest.json", "4. dddkit.manifest.json integrity")
+    total_errors += check_manifest(root, "claude.manifest.json", "5. claude.manifest.json integrity")
 
     if total_errors:
         print(f"\nValidation FAILED with {total_errors} error(s).")

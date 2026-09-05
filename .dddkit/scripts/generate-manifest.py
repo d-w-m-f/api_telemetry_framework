@@ -1,11 +1,19 @@
 #!/usr/bin/env python3
-"""Regenerate .dddkit/integrations/dddkit.manifest.json with real sha256 hashes.
+"""Regenerate a DDD-Kit integration manifest with real sha256 hashes.
 
-Same shape as .specify/integrations/speckit.manifest.json: lets validate-ddd.py
-(and, later, a reinstall/upgrade flow) detect drift between the files DDD-Kit
-shipped and what is actually on disk.
+--target dddkit (default): hashes everything under .dddkit/ into
+  .dddkit/integrations/dddkit.manifest.json.
+--target claude: hashes the dddkit-owned skill files under .claude/skills/
+  (any skill folder NOT prefixed "speckit-", which is out of scope - that's
+  GitHub Spec Kit's own integration) into
+  .dddkit/integrations/claude.manifest.json.
+
+Same shape as .specify/integrations/speckit.manifest.json: lets
+validate-ddd.py (and, later, a reinstall/upgrade flow) detect drift between
+the files an integration shipped and what is actually on disk.
 """
 
+import argparse
 import datetime
 import hashlib
 import json
@@ -22,26 +30,57 @@ def sha256_of(path):
     return digest.hexdigest()
 
 
-def main():
-    root = get_project_root()
+def collect_dddkit_files(root):
     kit_dir = root / ".dddkit"
-    manifest_path = kit_dir / "integrations" / "dddkit.manifest.json"
-
     files = {}
     for path in sorted(kit_dir.rglob("*")):
         if not path.is_file():
             continue
         if path.name in EXCLUDED_NAMES:
             continue
-        if any(part in EXCLUDED_DIR_NAMES for part in path.relative_to(kit_dir).parts[:-1]):
+        rel_parts = path.relative_to(kit_dir).parts
+        if rel_parts[0] == "integrations":
+            # Manifests never track other manifests (or themselves) - their
+            # installed_at timestamp changes on every regen, which would make
+            # dddkit.manifest.json go stale the instant claude.manifest.json
+            # is regenerated, and vice versa. Same convention speckit uses:
+            # .specify/integrations/speckit.manifest.json doesn't list itself.
             continue
-        if path == manifest_path:
+        if any(part in EXCLUDED_DIR_NAMES for part in rel_parts[:-1]):
             continue
-        rel = str(path.relative_to(root))
-        files[rel] = sha256_of(path)
+        files[str(path.relative_to(root))] = sha256_of(path)
+    return files
+
+
+def collect_claude_files(root):
+    skills_dir = root / ".claude" / "skills"
+    files = {}
+    if not skills_dir.is_dir():
+        return files
+    for skill_dir in sorted(skills_dir.iterdir()):
+        if not skill_dir.is_dir() or skill_dir.name.startswith("speckit-"):
+            continue
+        for path in sorted(skill_dir.rglob("*")):
+            if path.is_file():
+                files[str(path.relative_to(root))] = sha256_of(path)
+    return files
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--target", choices=["dddkit", "claude"], default="dddkit")
+    args = parser.parse_args()
+
+    root = get_project_root()
+    manifest_path = root / ".dddkit" / "integrations" / f"{args.target}.manifest.json"
+
+    if args.target == "dddkit":
+        files = collect_dddkit_files(root)
+    else:
+        files = collect_claude_files(root)
 
     manifest = {
-        "integration": "dddkit",
+        "integration": args.target,
         "version": "1.0.0",
         "installed_at": datetime.datetime.now(datetime.timezone.utc).isoformat(),
         "files": files,

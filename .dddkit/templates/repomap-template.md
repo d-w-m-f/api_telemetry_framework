@@ -20,7 +20,7 @@ code_glob: "[e.g. src/**/catalog/]"
 
 - **`code_glob`**: matches the file(s)/directory the module is implemented in. Resolved by `.dddkit/scripts/build-index.py` into `.dddkit/index.json`; consumers should read the index rather than re-resolving this glob themselves.
 - **`module_kind`**:
-  - `folder` — the module is a directory. The business-rule file MUST be named `regra-de-negocio.md` inside that directory.
+  - `folder` — the module is a directory. The business-rule file MUST be named `business-rules.md` inside that directory.
   - `file` — the module is a single source file. The business-rule file MUST be a markdown file sharing that file's name (e.g. `catalog.py` -> `catalog.md`), placed alongside it.
 
 ## Structure Notes
@@ -37,5 +37,5 @@ code_glob: "[e.g. src/**/catalog/]"
 
 ## Business Rule File
 
-- Path (once resolved): `[code_glob resolution]/regra-de-negocio.md` or `[code_glob resolution]/[module-file-name].md`
+- Path (once resolved): `[code_glob resolution]/business-rules.md` or `[code_glob resolution]/[module-file-name].md`
 - `validate-ddd.py` fails the build if this file is missing at the resolved path, or if `module_kind` does not match what is actually on disk (a glob that resolves to a single file with `module_kind: folder`, or vice versa).
