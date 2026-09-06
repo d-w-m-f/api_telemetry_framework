@@ -1,0 +1,18 @@
+{
+  "integration": "claude",
+  "version": "1.0.0",
+  "installed_at": "2026-09-06T05:00:41.259548+00:00",
+  "files": {
+    ".claude/skills/ddd-checklist/SKILL.md": "5bea11b5936427218e8ab17c35f652d05e85346a7dd9f1683cd103641016782a",
+    ".claude/skills/ddd-constitution/SKILL.md": "a86d7bef466ea440f39397c04ae3a86c393e6650bceac5d0f8fa57c78d1104ff",
+    ".claude/skills/ddd-generate-tasks/SKILL.md": "e0c0819976cde9db71e2942e4a86a91b89212a9cd07e0b70daddfd94a262b3e4",
+    ".claude/skills/ddd-go-planning/SKILL.md": "9ba73a724bbbca84d0cc819a43299f1e511734b56acc1b4fa509f3fe4eb43635",
+    ".claude/skills/ddd-implement/SKILL.md": "bd036a7a6e764bd889a4fa137ea3b5ddb068a02de380d2c88746b6179d832e1d",
+    ".claude/skills/ddd-implement-progress/SKILL.md": "1bfd3eb7dd8802fee1032c096588a6b2725b680c96c9d967d63470272b176c44",
+    ".claude/skills/ddd-interview/SKILL.md": "697cb3b4cd184765de581f7cf9cd4192f7d19541d427530a42e519426f9edf93",
+    ".claude/skills/ddd-map-contexts/SKILL.md": "8688b249b1fffcf1066471d081095d0cf8e0d903794ed7ddc797dbeb128110e3",
+    ".claude/skills/ddd-map-modules/SKILL.md": "7920dca8caf6a3e14b0532e9712a17583f7fdc2d666624661e5da35a972015e1",
+    ".claude/skills/ddd-map-requirements/SKILL.md": "27903775c7cd31c008904472ed551f3d474c2311d6ddd3dc221d8363b4f1f784",
+    ".claude/skills/dddintern-discover-bounded-context/SKILL.md": "fcb119c12bd8fc8ad509d1b8c802fce6ee0eb26d168a32ee1b1903b6e69e81c2"
+  }
+}
