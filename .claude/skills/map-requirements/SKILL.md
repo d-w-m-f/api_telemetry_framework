@@ -1,6 +1,6 @@
 ---
 name: "map-requirements"
-description: "Interview the user to extract testable functional and non-functional requirements into specs/brainstorm/requirements.md, seeding the project Constitution on first run."
+description: "Interview the user to extract testable functional and non-functional requirements into specs/Brainstorm/requirements.md, seeding the project Constitution on first run."
 argument-hint: "Optional focus area for this requirements pass"
 compatibility: "Requires a dddkit project (.dddkit/ directory at the repo root)"
 metadata:
@@ -18,20 +18,20 @@ $ARGUMENTS
 
 ## Goal
 
-Extract testable, unambiguous functional and non-functional requirements into `specs/brainstorm/requirements.md`. Unlike `/interview` (free-form capture of "what to build"), this skill's output must be structured and verifiable: "what the system must satisfy." On its first run in a project, also seed `specs/Constitution.md` from whatever durable, project-wide principles surfaced.
+Extract testable, unambiguous functional and non-functional requirements into `specs/Brainstorm/requirements.md`. Unlike `/interview` (free-form capture of "what to build"), this skill's output must be structured and verifiable: "what the system must satisfy." On its first run in a project, also seed `specs/Constitution.md` from whatever durable, project-wide principles surfaced.
 
 ## Outline
 
-1. Read `specs/brainstorm/interview.md` if it exists, for context — but this skill can run standalone if it doesn't.
+1. Read `specs/Brainstorm/interview.md` if it exists, for context — but this skill can run standalone if it doesn't.
 
-2. Read the existing `specs/brainstorm/requirements.md` if present, so you know the highest `FR-###`/`NFR-###` numbers already used — new requirements continue that numbering, they never renumber or overwrite existing IDs (other artifacts may already reference them).
+2. Read the existing `specs/Brainstorm/requirements.md` if present, so you know the highest `FR-###`/`NFR-###` numbers already used — new requirements continue that numbering, they never renumber or overwrite existing IDs (other artifacts may already reference them).
 
 3. Conduct a requirements-focused Q&A. For unclear aspects:
    - Make an informed guess based on context and industry standards, and document it under **Assumptions** in the output, rather than asking.
    - Only use `[NEEDS CLARIFICATION: specific question]` when the choice significantly impacts scope, has multiple reasonable interpretations with different implications, or has no reasonable default.
    - **Cap: max 3 `[NEEDS CLARIFICATION]` markers per run** (the cap resets each time this skill is invoked — it is not a project-lifetime budget). Prioritize by: scope > security/privacy > user experience > technical detail.
 
-4. Write/append to `specs/brainstorm/requirements.md` using `.dddkit/templates/requirements-template.md` (new file) or the existing file's structure (re-run):
+4. Write/append to `specs/Brainstorm/requirements.md` using `.dddkit/templates/requirements-template.md` (new file) or the existing file's structure (re-run):
    - Each requirement gets a stable, sequential ID (`FR-001`, `NFR-001`, ...).
    - New file: `version: 1.0.0`. Re-run: bump MINOR for new requirements added, PATCH for wording-only fixes to existing ones.
 
@@ -53,6 +53,6 @@ Extract testable, unambiguous functional and non-functional requirements into `s
 
 ## Done When
 
-- [ ] `specs/brainstorm/requirements.md` has testable, ID'd requirements with no more than 3 new unresolved `[NEEDS CLARIFICATION]` markers.
+- [ ] `specs/Brainstorm/requirements.md` has testable, ID'd requirements with no more than 3 new unresolved `[NEEDS CLARIFICATION]` markers.
 - [ ] `Constitution.md` exists if this was the first run and any durable principle surfaced; otherwise left untouched.
 - [ ] Completion reported per above.

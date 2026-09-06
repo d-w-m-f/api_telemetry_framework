@@ -33,5 +33,5 @@ status: draft
 
 ## Notes
 
-- This file is free-form capture, not structured requirements — do not restructure it into FR-###/NFR-### form here. That happens in `/map-requirements`, producing `specs/brainstorm/requirements.md`.
+- This file is free-form capture, not structured requirements — do not restructure it into FR-###/NFR-### form here. That happens in `/map-requirements`, producing `specs/Brainstorm/requirements.md`.
 - Do not name or propose Bounded Contexts here. That happens in `/map-contexts`, gated by `DDD.md` section 4 (explicit human approval required).

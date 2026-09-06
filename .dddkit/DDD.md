@@ -1,5 +1,32 @@
 <!--
 Sync Impact Report
+Version: 2.0.0 -> 2.1.0 (MINOR: section 1 materially expanded; no principle
+removed or redefined.)
+Modified principles:
+  - "1. Core Directory Rules" -> the dirmap now shows the whole of specs/, not
+    just BoundedContexts/. `Brainstorm/` and `Constitution.md` have existed and
+    been written by the pipeline since /interview and /map-requirements were
+    implemented, but neither appeared here, so the constitution described a
+    subset of the tree it governs.
+  - "1.2 Naming Rules and Levels" -> adds the rule for top-level directories
+    under specs/ (PascalCase), which was previously implicit in the single
+    example `BoundedContexts/` and had produced a lowercase `brainstorm/`.
+  - "1.1 Dirmap", .dddkit/ block -> adds PIPELINE.md (new this revision) and
+    linter/ (present since the Rust port), neither of which was listed.
+Added sections: none
+Removed sections: none
+Propagated to: specs/brainstorm/ -> specs/Brainstorm/ (renamed), and every live
+  reference to it (.dddkit/headers.yaml, .dddkit/templates/interview-template.md,
+  .claude/skills/{interview,map-requirements,map-contexts,generate-tasks}/SKILL.md,
+  specs/Constitution.md, specs/Brainstorm/interview.md,
+  specs/BoundedContexts/ReferenceDomain/catalog/domain.md).
+Not propagated (deliberate): workflow.md, a historical record of decisions as
+  they were made, is not retro-edited.
+Deferred TODOs: none
+-->
+
+<!--
+Sync Impact Report
 Version: 1.3.0 -> 2.0.0 (MAJOR: a mandated filename in section 3 was redefined
 incompatibly; any repository already compliant with 1.x becomes non-compliant.)
 Modified principles:
@@ -53,7 +80,7 @@ Deferred TODOs: none
 ---
 id: META-DDD-CONST-01
 filename: DDD.md
-version: 2.0.0
+version: 2.1.0
 status: approved
 domain_type: meta
 ---
@@ -66,13 +93,19 @@ Any agent, LLM, or human developer **MUST** validate architectural changes again
 
 ## 1. Core Directory Rules
 
-The root of these specifications is `specs/`. Inside it live the ubiquitous documents (this file and `shared_language.md`, both under `.dddkit/`), and the `BoundedContexts/` directory, which is the entry point for every domain spec.
+The root of these specifications is `specs/`. Inside it live the project's own `Constitution.md`, the `Brainstorm/` directory (the pre-domain material every context is derived from), and the `BoundedContexts/` directory, which is the entry point for every domain spec. The framework's own ubiquitous documents (this file and `shared_language.md`) sit apart, under `.dddkit/` — they govern every project, so they are not part of any one project's specs.
 
 ### 1.1 Dirmap
 
 ```text
 specs/
+├── Constitution.md            # The project's own engineering principles
+├── Brainstorm/                # Pre-domain material: what is being built, and why
+│   ├── interview.md           #   /interview      - free-form capture
+│   └── requirements.md        #   /map-requirements - FR-###/NFR-###
+├── checklists/                # Optional, project-wide checklists (/checklist)
 └── BoundedContexts/           # Entry point for domain specs
+    ├── contexts.md            # The context map (/map-contexts)
     ├── ContextA/               # PascalCase for Bounded Contexts
     │   ├── module-one/         # kebab-case for Modules
     │   │   ├── domain.md
@@ -86,14 +119,17 @@ specs/
 ├── DDD.md                     # THIS FILE (the Constitution)
 ├── headers.yaml               # Expected frontmatter per document type
 ├── shared_language.md         # Global ubiquitous language
+├── PIPELINE.md                # The skills, and the workflows they compose into
 ├── index.json                 # Generated: uuid -> {spec_path, code_path} cache
 ├── templates/                 # Templates for AI-generated artifacts
 ├── scripts/                   # Deterministic code (scaffolding, validation, indexing)
+├── linter/                    # The Rust linter (source; build output is not committed)
 └── integrations/              # Integration manifests (file hashes)
 ```
 
 ### 1.2 Naming Rules and Levels
 
+- **Top-level directories under `specs/`:** Named in `PascalCase` (`Brainstorm/`, `BoundedContexts/`). They are structural, not domain — one per kind of spec material, never one per domain concept. `specs/checklists/` is a pre-existing exception, not a pattern to copy: `/checklist` writes there in lowercase. It is recorded here as-is rather than silently renamed, since renaming it would break that skill.
 - **Bounded Contexts:** Named in `PascalCase` (e.g. `LabExperiments`, `ReferenceDomain`). Sit directly under `BoundedContexts/`.
 - **Modules:** Named in `kebab-case` (e.g. `catalog-service`, `order-processing`). A module represents one subdomain and contains `domain.md`, `vocabulary.md`, and `repomap.md`.
 - **Logical Folders:** Wrapped in brackets (e.g. `[infrastructure]`, `[core]`). May exist **only** two or more levels below `BoundedContexts/`. They cannot contain domain markdown files directly — they only group modules.

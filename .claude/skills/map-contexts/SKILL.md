@@ -19,8 +19,8 @@ $ARGUMENTS
 ## Prerequisites
 
 Refuse to proceed, and say so plainly, unless **both** exist:
-- `specs/brainstorm/interview.md`
-- `specs/brainstorm/requirements.md`
+- `specs/Brainstorm/interview.md`
+- `specs/Brainstorm/requirements.md`
 
 Direct the user to `/interview` and/or `/map-requirements` if either is missing.
 

@@ -4,7 +4,8 @@
 Checks (see DDD.md section 3-4 and workflow.md's linter memorandum):
   1. .dddkit/index.json is not stale relative to the real domain.md/repomap.md files.
   2. Every module's business-rule file exists at the location repomap.md points at,
-     and module_kind matches what is actually on disk.
+     and module_kind matches what is actually on disk. Also warns (non-fatally)
+     when that file's identity frontmatter disagrees with the spec side.
   3. Every context-map.md entry has a matching folder under BoundedContexts/, and
      every such folder is named in context-map.md (no orphans either direction).
   4. Every file listed in .dddkit/integrations/dddkit.manifest.json still matches
@@ -76,6 +77,37 @@ def check_index_freshness(root, specs_dir):
     return errors
 
 
+def check_anchor_identity(root, module_dir, rule_file, module_kind):
+    """Warn when a business-rule file's identity fields disagree with the spec.
+
+    headers.yaml requires the anchor to restate bounded_context/module (from
+    domain.md) and module_kind (from repomap.md), so a developer who opens it
+    from the source tree knows which spec owns the code without resolving a
+    uuid first. All three are copies, which per shared_language.md section 5
+    makes a disagreement a Fixable Finding, not a Failure - it is rebuildable
+    from the source of truth without a human decision. So this warns and does
+    not fail the build; `dddkit check --fix` rewrites the fields.
+    """
+    domain_fields = parse_frontmatter(module_dir / "domain.md")
+    expected = {
+        "bounded_context": domain_fields.get("bounded_context", ""),
+        "module": domain_fields.get("module", ""),
+        "module_kind": module_kind,
+    }
+    if any(not v or v.startswith("[") for v in expected.values()):
+        return  # spec side unfilled; reported elsewhere, not the anchor's fault
+
+    actual = parse_frontmatter(rule_file)
+    for key, want in expected.items():
+        got = actual.get(key, "")
+        if not got or got.startswith("["):
+            print(f"   WARN: {rule_file.relative_to(root)} is missing '{key}' "
+                  f"(should be '{want}', per headers.yaml). Fixable, not fatal.")
+        elif got != want:
+            print(f"   WARN: {rule_file.relative_to(root)} says {key} '{got}' "
+                  f"but the spec says '{want}'. Fixable, not fatal.")
+
+
 def check_sdsfc(root, specs_dir):
     print("\n=== 2. SdSFC (business-rule file next to the code) ===")
     module_dirs = list(find_module_dirs(specs_dir))
@@ -131,6 +163,7 @@ def check_sdsfc(root, specs_dir):
 
         if rule_file.exists():
             print(f"   OK: {rule_file.relative_to(root)} found.")
+            check_anchor_identity(root, module_dir, rule_file, module_kind)
         else:
             print(f"   ERROR: expected business-rule file not found at {rule_file.relative_to(root)}.")
             errors += 1

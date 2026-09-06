@@ -5,7 +5,7 @@
 # ("Spec Markdown Structure"). Scripts (validate-ddd.py) and future skills
 # should treat this file as the schema to check frontmatter against, instead
 # of hardcoding field lists.
-version: 2
+version: 3
 
 doc_types:
 
@@ -27,6 +27,21 @@ doc_types:
       filename: {type: string, required: true}
       version: {type: semver, required: true}
       status: {type: enum, values: [draft, review, approved, deprecated], required: true}
+
+  pipeline:
+    filename: PIPELINE.md
+    location: .dddkit/PIPELINE.md
+    description: >
+      The framework's operating manual: what each skill in .claude/skills/
+      does, and the minimum and complete workflows they compose into. Where it
+      disagrees with DDD.md, DDD.md wins - this file describes the pipeline,
+      it does not govern it.
+    fields:
+      id: {type: string, required: true, example: META-PIPELINE-01}
+      filename: {type: string, required: true}
+      version: {type: semver, required: true}
+      status: {type: enum, values: [draft, review, approved, deprecated], required: true}
+      domain_type: {type: enum, values: [meta], required: true}
 
   context-map:
     filename: contexts.md
@@ -81,10 +96,21 @@ doc_types:
     description: >
       Lives with the source code, not under specs/. Fine-grained business
       rules, data flows, validations, and edge cases for the module.
+
+      This file is the Module Anchor: the module's presence on the code side.
+      Beyond implements_uuid it restates the module's identity (bounded_context,
+      module, module_kind) so a developer who opens it from the source tree can
+      see which spec owns the code they are reading without first resolving a
+      uuid through the index. All three are DERIVED from the spec side - the
+      uuid remains the sole source of truth - so a disagreement is a fixable
+      finding, never an authority conflict.
     fields:
       implements_uuid: {type: uuid, required: true, description: "Same uuid as the domain.md/repomap.md pair this file documents."}
       version: {type: semver, required: true}
       status: {type: enum, values: [draft, review, approved, deprecated], required: true}
+      bounded_context: {type: string, required: true, description: "PascalCase name of the owning Bounded Context. Derived from the sibling domain.md."}
+      module: {type: string, required: true, description: "kebab-case module name. Derived from the sibling domain.md."}
+      module_kind: {type: enum, values: [folder, file], required: true, description: "Derived from repomap.md. Must agree with the anchor's own shape: business-rules.md anchors a folder module, any other filename anchors a file module."}
 
   plan:
     filename: plan.md
@@ -126,7 +152,7 @@ doc_types:
 
   interview:
     filename: interview.md
-    location: specs/brainstorm/interview.md
+    location: specs/Brainstorm/interview.md
     description: >
       Free-form capture of what the user wants to build, produced by
       /interview. Grows by appending dated rounds, never by rewriting prior
@@ -138,7 +164,7 @@ doc_types:
 
   requirements:
     filename: requirements.md
-    location: specs/brainstorm/requirements.md
+    location: specs/Brainstorm/requirements.md
     description: >
       Functional/non-functional requirements produced by /map-requirements,
       structured and testable (unlike interview.md's free-form capture).

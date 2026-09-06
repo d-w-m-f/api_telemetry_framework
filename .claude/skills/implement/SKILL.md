@@ -33,6 +33,7 @@ Invoke `/discover-bounded-context` with `$ARGUMENTS` to resolve the target modul
 4. **Execute tasks phase by phase**, respecting `tasks.md`'s dependency order and `[P]` parallel markers:
    - Write real code at the location `repomap.md`'s `code_glob` resolves to (create the file/directory if it doesn't exist yet — this is normal on a module's first `/implement` run).
    - **When a phase's business-rule-file task comes up, write it in that same pass, alongside the code it documents** — never defer it to a later cleanup task. Fill it in for real (data flow, validations, edge cases per `.dddkit/templates/business-rules-template.md`'s sections), grounded in the code just written — not generic boilerplate.
+   - **Fill the business-rule file's identity frontmatter by copying it, never by inferring it**: `bounded_context` and `module` come from the sibling `domain.md`, `module_kind` from the sibling `repomap.md`, and `implements_uuid` from either. They are derived data — a value you reasoned your way to instead of copying is how the anchor and the spec start to disagree.
    - Mark each completed task `[X]` in `tasks.md` as you go.
    - If `roadmap.md` exists, update the current phase's Status/Session Notes columns as it completes.
 

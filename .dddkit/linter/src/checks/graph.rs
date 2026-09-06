@@ -240,26 +240,60 @@ fn check_module(
                 }
             }
             findings.push(f);
+            check_anchor_identity(m, a, &kind, opts, findings);
             resolutions.insert(m.uuid.clone(), Resolved { code_path, kind });
         }
 
         // The plan says code lives somewhere; the uuid is nowhere in the
-        // project. This is the real failure: the module is lost.
-        (true, None) => findings.push(
-            Finding::new(
-                Concern::Graph,
-                Severity::Failure,
-                "module-not-found",
-                format!(
-                    "{} declares code at '{}' but no anchor carrying uuid {} exists anywhere in the project.",
-                    m.reference(),
-                    m.code_glob.as_deref().unwrap_or("?"),
-                    m.uuid
-                ),
-            )
-            .module(m)
-            .fix_hint("write the module's code and its business-rule file, or run /implement"),
-        ),
+        // project. Two genuinely different situations share that shape, and
+        // conflating them makes the linter red during normal development:
+        //
+        //   - the declared location does not exist at all. /plan-context
+        //     finalizes the pointer *before* /implement writes any code, so
+        //     every module legitimately passes through this state. Pending.
+        //   - the declared location exists, but nothing under it carries the
+        //     uuid. There is code here that lost (or never had) its SdSFC
+        //     anchor. That is real drift. Failure.
+        //
+        // A module deleted wholesale after being implemented degrades to
+        // Pending rather than Failure. That is deliberate: the filesystem
+        // alone cannot distinguish "never written" from "removed", and a
+        // module that is no longer on disk is, accurately, not implemented.
+        (true, None) => {
+            let glob = m.code_glob.as_deref().unwrap_or("");
+            if project::resolve_glob(root, glob).is_empty() {
+                findings.push(
+                    Finding::new(
+                        Concern::Graph,
+                        Severity::Pending,
+                        "module-not-implemented",
+                        format!(
+                            "{} is planned at '{}' but nothing exists there yet. Run /generate-tasks, then /implement.",
+                            m.reference(),
+                            glob
+                        ),
+                    )
+                    .module(m),
+                );
+            } else {
+                findings.push(
+                    Finding::new(
+                        Concern::Graph,
+                        Severity::Failure,
+                        "module-anchor-missing",
+                        format!(
+                            "{} has code at '{}' but no anchor carrying uuid {} exists anywhere in the project.",
+                            m.reference(),
+                            glob,
+                            m.uuid
+                        ),
+                    )
+                    .module(m)
+                    .path(glob.to_string())
+                    .fix_hint("add the module's business-rule file carrying implements_uuid"),
+                );
+            }
+        }
 
         (true, Some(a)) => {
             let declared_kind = m.module_kind.clone().unwrap_or_default();
@@ -341,12 +375,93 @@ fn check_module(
                 );
             }
 
+            check_anchor_identity(m, a, &declared_kind, opts, findings);
+
             resolutions.insert(
                 m.uuid.clone(),
                 Resolved { code_path, kind: declared_kind },
             );
         }
     }
+}
+
+/// Does the anchor still restate the module's identity correctly?
+///
+/// `bounded_context` and `module` are copies of domain.md, `module_kind` a copy
+/// of repomap.md. They exist for the developer who arrives from the source tree
+/// holding a directory rather than a uuid, and who would otherwise have to
+/// resolve the uuid through the index to learn which spec owns the code.
+///
+/// Being copies makes every disagreement Fixable by definition: the spec side
+/// is the source of truth and the anchor is rewritable from it without a human
+/// decision. This never contradicts the uuid -- a module whose `module:` field
+/// says something else is still that uuid's module; the label is just stale.
+fn check_anchor_identity(
+    m: &SpecModule,
+    a: &Anchor,
+    kind: &str,
+    opts: &Options,
+    findings: &mut Vec<Finding>,
+) {
+    // Nothing to compare against if the spec side itself is unfilled. That is
+    // reported separately rather than blamed on the anchor.
+    if m.bounded_context.is_empty()
+        || crate::frontmatter::is_placeholder(&m.bounded_context)
+        || m.module.is_empty()
+        || crate::frontmatter::is_placeholder(&m.module)
+    {
+        return;
+    }
+
+    let text = match std::fs::read_to_string(&a.path) {
+        Ok(t) => t,
+        Err(_) => return,
+    };
+    let fields = crate::frontmatter::parse(&text);
+
+    let expected = [
+        ("bounded_context", m.bounded_context.as_str()),
+        ("module", m.module.as_str()),
+        ("module_kind", kind),
+    ];
+    let drifted: Vec<String> = expected
+        .iter()
+        .filter_map(|(key, want)| match crate::frontmatter::resolved(&fields, key) {
+            Some(got) if got == *want => None,
+            Some(got) => Some(format!("{key} says '{got}', spec says '{want}'")),
+            None => Some(format!("{key} is missing (spec says '{want}')")),
+        })
+        .collect();
+
+    if drifted.is_empty() {
+        return;
+    }
+
+    let mut f = Finding::new(
+        Concern::Graph,
+        Severity::Fixable,
+        "anchor-identity-stale",
+        format!(
+            "{}: the anchor at {} does not restate its own identity correctly -- {}.",
+            m.reference(),
+            a.rel_path,
+            drifted.join("; ")
+        ),
+    )
+    .module(m)
+    .path(a.rel_path.clone())
+    .fix_hint(format!(
+        "set bounded_context: {}, module: {}, module_kind: {}",
+        m.bounded_context, m.module, kind
+    ));
+
+    if opts.fix {
+        match fixer::set_anchor_identity(&a.path, &m.bounded_context, &m.module, kind) {
+            Ok(()) => f.fixed = true,
+            Err(e) => f.message = format!("{} (fix failed: {})", f.message, e),
+        }
+    }
+    findings.push(f);
 }
 
 /// `business-rules.md` anchors a folder module; any other filename anchors a

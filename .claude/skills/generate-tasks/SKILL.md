@@ -28,7 +28,7 @@ Produce `tasks.md` for the module: a concrete, dependency-ordered, ideally-paral
 
 1. Read `plan.md`, `domain.md`, and the now-finalized `repomap.md` (`code_glob`) for the module.
 2. Read `specs/Constitution.md`, if it exists, for any task-level constraints (e.g. mandatory test coverage).
-3. Read `specs/brainstorm/requirements.md`, if it exists, to tag tasks with `(FR-###)` where a task clearly implements a specific requirement — this is a traceability tag, not the organizing key.
+3. Read `specs/Brainstorm/requirements.md`, if it exists, to tag tasks with `(FR-###)` where a task clearly implements a specific requirement — this is a traceability tag, not the organizing key.
 
 4. Build `tasks.md` from `.dddkit/templates/tasks-template.md`:
    - **Phase 1 (Setup)**: creating the source location, initializing dependencies per `plan.md`.

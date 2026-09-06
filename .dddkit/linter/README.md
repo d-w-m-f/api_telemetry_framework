@@ -83,8 +83,11 @@ These are behaviour changes, not bugs:
 |---|---|---|
 | Module directory moved, `code_glob` now stale | **error** ("matched nothing") | **Fixable** — the uuid is found and the glob is repaired |
 | Module modelled but not yet planned/implemented | **error** (unresolved `code_glob`) | **Pending** — not a failure, or the linter would be unusable until every module is finished |
+| Module planned (`code_glob` finalized) but code not yet written | **error** ("matched nothing") | **Pending** — `/plan-context` finalizes the pointer *before* `/implement` writes code, so every module passes through this state legitimately |
+| Declared location exists but nothing under it carries the uuid | **error** (business-rule file missing) | **Failure** `module-anchor-missing` — code is present and has lost its SdSFC anchor, which is real drift rather than unfinished work |
 | `index.json` missing or stale | **error** | **Fixable** — it is a cache, always rebuildable |
 | Code exists, `repomap.md` never finalized | not detected | **Fixable** — pointer backfilled from the anchor |
+| Anchor's `bounded_context`/`module`/`module_kind` disagree with the spec | **warning**, non-fatal | **Fixable** `anchor-identity-stale` — rewritten from the spec side |
 
 The first row is the reason the port exists: `workflow.md` asked for lookup "por uma
 chave/ID/uuid, não por um PATH... se o user troca um dir de lugar, ainda dá pra achar",
@@ -92,8 +95,10 @@ and the Python implementation never searches for a uuid at all.
 
 ## What `--fix` will and will not touch
 
-**Will**: `repomap.md`'s `module_kind`/`code_glob` frontmatter, and `.dddkit/index.json`.
-Both are derived data, reconstructible from the uuid without a human decision.
+**Will**: `repomap.md`'s `module_kind`/`code_glob` frontmatter, `.dddkit/index.json`, and
+the `bounded_context`/`module`/`module_kind` fields inside a business-rule file's
+frontmatter block. All are derived data, reconstructible from the uuid without a human
+decision. A business-rule file's *body* is authored content and is never touched.
 
 **Will not**: source code, business-rule files (a generated stub would satisfy the check
 while defeating its purpose), `contexts.md` or the context folders (that reconciliation is

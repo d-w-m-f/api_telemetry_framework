@@ -2,6 +2,9 @@
 implements_uuid: [SAME_UUID_AS_DOMAIN_MD_AND_REPOMAP_MD]
 version: 1.0.0
 status: draft
+bounded_context: [SAME_BOUNDED_CONTEXT_AS_DOMAIN_MD]
+module: [SAME_MODULE_AS_DOMAIN_MD]
+module_kind: [SAME_MODULE_KIND_AS_REPOMAP_MD: folder|file]
 ---
 
 # Business Rules: [MODULE_NAME]
@@ -12,6 +15,19 @@ status: draft
   the fine-grained counterpart to domain.md - data flows, validations, and
   edge cases that are too implementation-specific for the spec layer but
   too important to leave undocumented.
+
+  This file is the module's ANCHOR: finding it is finding the module. The
+  three identity fields below exist so that a developer arriving from the
+  source tree - who has a directory, not a uuid - can see at a glance which
+  Bounded Context and module own this code, and what shape the module is
+  declared to have. Copy them from the spec side; do not invent them:
+
+    bounded_context, module  <- the sibling domain.md's frontmatter
+    module_kind              <- the sibling repomap.md's frontmatter
+
+  They are derived data. The uuid stays the sole source of truth, so if one
+  of them ever disagrees with the spec, the spec wins and the linter reports
+  a fixable finding (`dddkit-lint --fix` rewrites them).
 -->
 
 ## Rules

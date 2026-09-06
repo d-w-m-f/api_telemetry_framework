@@ -2,3 +2,6 @@ __pycache__/
 *.pyc
 plan/
 *.txt
+# The blanket *.txt rule above is for scratch prompt dumps at the repo root.
+# Dependency manifests are source and must survive a clone (ReferenceDomain NFR-002).
+!**/requirements.txt

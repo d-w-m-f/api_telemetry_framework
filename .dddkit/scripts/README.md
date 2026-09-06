@@ -39,8 +39,9 @@ For every module, reads its `repomap.md` frontmatter (`code_glob`, `module_kind`
 - Resolves `code_glob` against the repo root (`root.glob(code_glob)`) — errors if it matches zero paths or more than one (it must resolve to exactly one).
 - Errors if the resolved path's actual type (file vs. directory) doesn't match the declared `module_kind`.
 - Checks for the business-rule file at that location: `business-rules.md` inside the resolved directory for `module_kind: folder`, or a same-named `.md` file next to it for `module_kind: file`.
+- **Warns, without failing**, when that file's identity frontmatter (`bounded_context`, `module`, `module_kind` — required by `headers.yaml`) is missing or disagrees with the spec side. Those three fields are copies of `domain.md`/`repomap.md`, so a disagreement is a Fixable Finding per `shared_language.md` section 5: rebuildable from the source of truth without a human decision, and therefore not something that should break a build.
 
-**Fix**: run `/plan-context` if `code_glob`/`module_kind` aren't finalized yet; otherwise write the missing business-rule file (this is what `/implement` does automatically as it writes code).
+**Fix**: run `/plan-context` if `code_glob`/`module_kind` aren't finalized yet; otherwise write the missing business-rule file (this is what `/implement` does automatically as it writes code). For an identity warning, `dddkit check --fix` rewrites the fields from the spec.
 
 ### 3. `context-map.md` ↔ `BoundedContexts/` folders
 
