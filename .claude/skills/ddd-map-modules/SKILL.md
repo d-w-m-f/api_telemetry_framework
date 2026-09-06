@@ -1,5 +1,5 @@
 ---
-name: "model-context"
+name: "ddd-map-modules"
 description: "Model the modules inside a Bounded Context: propose module boundaries, scaffold them, and fill in domain.md/vocabulary.md through a modeling conversation."
 argument-hint: "The Bounded Context name, and optionally a specific module to model"
 compatibility: "Requires a dddkit project (.dddkit/ directory at the repo root); the target Bounded Context must already exist under specs/BoundedContexts/"
@@ -18,17 +18,17 @@ $ARGUMENTS
 
 ## Prerequisites
 
-The target Bounded Context must already exist as a folder under `specs/BoundedContexts/` (created by `/map-contexts`). If it doesn't, say so and suggest `/map-contexts` first.
+The target Bounded Context must already exist as a folder under `specs/BoundedContexts/` (created by `/ddd-map-contexts`). If it doesn't, say so and suggest `/ddd-map-contexts` first.
 
 ## Goal
 
-For one Bounded Context, model its modules through a real conversation about aggregates, entities, invariants, and ubiquitous language — then scaffold each approved module (`domain.md`, `vocabulary.md`, `repomap.md` skeleton) using the existing scaffolding script, and fill `domain.md`/`vocabulary.md` in completely. `repomap.md` is left as a skeleton — its `code_glob`/`module_kind` are `/plan-context`'s job, not this skill's.
+For one Bounded Context, model its modules through a real conversation about aggregates, entities, invariants, and ubiquitous language — then scaffold each approved module (`domain.md`, `vocabulary.md`, `repomap.md` skeleton) using the existing scaffolding script, and fill `domain.md`/`vocabulary.md` in completely. `repomap.md` is left as a skeleton — its `code_glob`/`module_kind` are `/ddd-go-planning`'s job, not this skill's.
 
 ## Outline
 
 1. **Determine scope**: if `$ARGUMENTS` names a specific module, work on just that one. If it names only the Bounded Context (or the context has unmodeled aggregates the user hasn't named yet), offer batch mode: walk through every module needed for that context in this session, one at a time, using the same propose-then-approve-then-model loop for each.
 
-2. **Propose module boundaries** before scaffolding anything, mirroring `/map-contexts`' propose-then-approve pattern:
+2. **Propose module boundaries** before scaffolding anything, mirroring `/ddd-map-contexts`' propose-then-approve pattern:
    - From the conversation and whatever's in `interview.md`/`requirements.md` relevant to this context, propose a candidate module list: one module per aggregate boundary, each a kebab-case name with a one-line description of its aggregate root.
    - If a proposed module clearly spans multiple aggregates with no single clear root, say so and suggest splitting it — don't scaffold an ill-defined module just because the user suggested one name for it.
    - Wait for the user to confirm (or adjust) the module list before creating anything.
@@ -48,19 +48,19 @@ For one Bounded Context, model its modules through a real conversation about agg
    ```
    python3 .dddkit/scripts/build-index.py
    ```
-   A "matched nothing" warning for these modules' unresolved `code_glob` is expected and fine at this stage — `/plan-context` resolves that later.
+   A "matched nothing" warning for these modules' unresolved `code_glob` is expected and fine at this stage — `/ddd-go-planning` resolves that later.
 
 ## Behavioral Rules
 
 - One module per aggregate boundary is the default heuristic — this is DDD's own aggregate-design guidance, not a dddkit-specific invention.
-- Never create a Bounded Context here — that's `/map-contexts`' job and its own approval gate. If the user tries to introduce a new context mid-conversation, stop and redirect to `/map-contexts`.
+- Never create a Bounded Context here — that's `/ddd-map-contexts`' job and its own approval gate. If the user tries to introduce a new context mid-conversation, stop and redirect to `/ddd-map-contexts`.
 - Ground-language consistency checking against `.dddkit/shared_language.md` is deferred (not yet a defined behavior — see `plan/012_cross-cutting-conventions.md`); reference it for context only, don't enforce term reuse.
 
 ## Completion Report
 
 - Which module(s) were scaffolded/modeled this run, and their UUIDs.
 - Confirmation that `.dddkit/index.json` was refreshed.
-- Suggested next step: `/plan-context` for each modeled module.
+- Suggested next step: `/ddd-go-planning` for each modeled module.
 
 ## Done When
 

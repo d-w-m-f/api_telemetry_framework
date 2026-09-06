@@ -83,7 +83,7 @@ These are behaviour changes, not bugs:
 |---|---|---|
 | Module directory moved, `code_glob` now stale | **error** ("matched nothing") | **Fixable** — the uuid is found and the glob is repaired |
 | Module modelled but not yet planned/implemented | **error** (unresolved `code_glob`) | **Pending** — not a failure, or the linter would be unusable until every module is finished |
-| Module planned (`code_glob` finalized) but code not yet written | **error** ("matched nothing") | **Pending** — `/plan-context` finalizes the pointer *before* `/implement` writes code, so every module passes through this state legitimately |
+| Module planned (`code_glob` finalized) but code not yet written | **error** ("matched nothing") | **Pending** — `/ddd-go-planning` finalizes the pointer *before* `/ddd-implement` writes code, so every module passes through this state legitimately |
 | Declared location exists but nothing under it carries the uuid | **error** (business-rule file missing) | **Failure** `module-anchor-missing` — code is present and has lost its SdSFC anchor, which is real drift rather than unfinished work |
 | `index.json` missing or stale | **error** | **Fixable** — it is a cache, always rebuildable |
 | Code exists, `repomap.md` never finalized | not detected | **Fixable** — pointer backfilled from the anchor |
@@ -102,7 +102,7 @@ decision. A business-rule file's *body* is authored content and is never touched
 
 **Will not**: source code, business-rule files (a generated stub would satisfy the check
 while defeating its purpose), `contexts.md` or the context folders (that reconciliation is
-`/map-contexts`' job, behind a human approval gate), and **the integrity manifests** —
+`/ddd-map-contexts`' job, behind a human approval gate), and **the integrity manifests** —
 regenerating a manifest to silence a hash mismatch defeats the entire tamper check. Confirm
 the change was intentional, then run `generate-manifest.py` explicitly.
 

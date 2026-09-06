@@ -1,5 +1,5 @@
 ---
-name: "constitution"
+name: "ddd-constitution"
 description: "Create or amend the project's own engineering constitution at specs/Constitution.md, distinct from the framework's DDD.md."
 argument-hint: "Principles or values to add/change in the project constitution"
 compatibility: "Requires a dddkit project (.dddkit/ directory at the repo root)"
@@ -23,7 +23,7 @@ You **MUST** consider the user input before proceeding (if not empty).
 This command's own work is limited to updating `specs/Constitution.md`. It never touches `.dddkit/DDD.md` — that document is the framework's own DDD-modeling constitution, governed separately by `DDD.md` section 4 (human-approval gate for new Bounded Contexts), not by this skill.
 
 - Classify every part of the user input as either constitution content or a separate, non-governance intent.
-- If the input includes feature implementation, code generation, or other build requests, do **not** execute them — extract them as deferred intents and list them under a `Next Actions` section at the end, suggesting the right command (e.g. `/map-requirements`, `/model-context`) without invoking it.
+- If the input includes feature implementation, code generation, or other build requests, do **not** execute them — extract them as deferred intents and list them under a `Next Actions` section at the end, suggesting the right command (e.g. `/ddd-map-requirements`, `/ddd-map-modules`) without invoking it.
 - If it's unclear whether something is constitution content, ask before changing anything.
 
 ## Outline
@@ -32,7 +32,7 @@ This command's own work is limited to updating `specs/Constitution.md`. It never
 
 2. Check whether `specs/Constitution.md` exists:
    - **If it exists**: load it as the current source of truth. Preserve everything still applicable while applying the requested change.
-   - **If it does not exist**: this skill may create it directly from the user's supplied principles (it does not require a prior `/map-requirements` run to have seeded it) — but if the user hasn't actually supplied any real principles yet, suggest running `/map-requirements` first instead of generating a constitution from nothing.
+   - **If it does not exist**: this skill may create it directly from the user's supplied principles (it does not require a prior `/ddd-map-requirements` run to have seeded it) — but if the user hasn't actually supplied any real principles yet, suggest running `/ddd-map-requirements` first instead of generating a constitution from nothing.
 
 3. Identify every placeholder token of the form `[ALL_CAPS_IDENTIFIER]` in the working document. Collect/derive values:
    - If the user's input supplies a value, use it.

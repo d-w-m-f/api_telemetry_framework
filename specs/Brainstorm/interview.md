@@ -8,7 +8,7 @@ status: draft
 
 <!--
   This file grows by APPENDING a new "## Round N" section each time
-  /interview runs again — never rewrite or delete a prior round's answers.
+  /ddd-interview runs again — never rewrite or delete a prior round's answers.
   Bump the version (MINOR) whenever a round adds real new material; PATCH
   only for a pure wording correction to something already recorded.
 -->
@@ -42,7 +42,7 @@ amount of work, which is exactly the confound the benchmark exists to avoid.
 The existing Bounded Contexts in `specs/BoundedContexts/contexts.md` already
 anticipate this work — this round extends that structure rather than starting
 from a blank slate. No new Bounded Context is proposed here (that decision
-belongs to `/map-contexts` and its approval gate).
+belongs to `/ddd-map-contexts` and its approval gate).
 
 ### Target Users
 
@@ -112,5 +112,5 @@ Recorded for a future round rather than answered now:
 
 ## Notes
 
-- This file is free-form capture, not structured requirements — do not restructure it into FR-###/NFR-### form here. That happens in `/map-requirements`, producing `specs/Brainstorm/requirements.md`.
-- Do not name or propose Bounded Contexts here. That happens in `/map-contexts`, gated by `DDD.md` section 4 (explicit human approval required).
+- This file is free-form capture, not structured requirements — do not restructure it into FR-###/NFR-### form here. That happens in `/ddd-map-requirements`, producing `specs/Brainstorm/requirements.md`.
+- Do not name or propose Bounded Contexts here. That happens in `/ddd-map-contexts`, gated by `DDD.md` section 4 (explicit human approval required).

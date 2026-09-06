@@ -6,9 +6,9 @@
   Removed sections: none
   Deferred TODOs: none — every placeholder token in
     .dddkit/templates/constitution-template.md was resolved at creation.
-  Origin: seeded by /map-requirements from specs/Brainstorm/interview.md and
+  Origin: seeded by /ddd-map-requirements from specs/Brainstorm/interview.md and
     specs/Brainstorm/requirements.md v1.0.0, per that skill's first-run
-    Constitution-seeding step. All later amendments go through /constitution.
+    Constitution-seeding step. All later amendments go through /ddd-constitution.
 -->
 
 ---
@@ -21,7 +21,7 @@ last_amended: 2026-09-05
 
 # api_throughput_n_telemetry Constitution
 
-This is the project's own engineering constitution — distinct from `.dddkit/DDD.md`, which governs how DDD modeling itself is done and is not edited through this document. Amended exclusively through `/constitution` after the first draft.
+This is the project's own engineering constitution — distinct from `.dddkit/DDD.md`, which governs how DDD modeling itself is done and is not edited through this document. Amended exclusively through `/ddd-constitution` after the first draft.
 
 ## Core Principles
 
@@ -59,13 +59,13 @@ Every rejection a service can produce MUST carry a stable, machine-readable code
 
 **Authority.** This constitution governs engineering practice for this repository. It does not govern DDD modeling mechanics — directory structure, naming, the SdSFC pattern, and the human-approval gate on new Bounded Contexts live in `.dddkit/DDD.md` and are amended there, not here. Where the two documents both speak, `.dddkit/DDD.md` prevails on modeling questions and this document prevails on engineering questions.
 
-**Amendment procedure.** Amendments are made exclusively through `/constitution`. Every amendment MUST carry a Sync Impact Report prepended above the frontmatter, recording the version transition and what changed. Prior Sync Impact Reports are never deleted; a new one is prepended above them.
+**Amendment procedure.** Amendments are made exclusively through `/ddd-constitution`. Every amendment MUST carry a Sync Impact Report prepended above the frontmatter, recording the version transition and what changed. Prior Sync Impact Reports are never deleted; a new one is prepended above them.
 
 **Versioning policy.**
 - **MAJOR** — a principle is removed, or redefined in a way that invalidates work done under the previous reading.
 - **MINOR** — a new principle is added, or existing guidance is materially expanded.
 - **PATCH** — wording, clarification, or typo fixes that leave the meaning intact.
 
-**Compliance review.** `/plan-context` MUST check its plan against these principles before and after drafting, and any violation MUST be either resolved or recorded with justification in that plan's Complexity Tracking table. An unjustified violation blocks the plan, not the principle.
+**Compliance review.** `/ddd-go-planning` MUST check its plan against these principles before and after drafting, and any violation MUST be either resolved or recorded with justification in that plan's Complexity Tracking table. An unjustified violation blocks the plan, not the principle.
 
 **Version**: 1.0.0 | **Ratified**: 2026-09-05 | **Last Amended**: 2026-09-05

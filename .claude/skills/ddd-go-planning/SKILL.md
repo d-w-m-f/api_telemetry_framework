@@ -1,5 +1,5 @@
 ---
-name: "plan-context"
+name: "ddd-go-planning"
 description: "Produce the technical implementation plan for a module and finalize its repomap.md (code_glob + module_kind)."
 argument-hint: "The Bounded Context and module to plan, e.g. 'Catalog/product-listing'"
 compatibility: "Requires a dddkit project (.dddkit/ directory at the repo root); the target module must already have domain.md and vocabulary.md"
@@ -18,7 +18,7 @@ $ARGUMENTS
 
 ## Prerequisites
 
-Invoke `/discover-bounded-context` with `$ARGUMENTS` to resolve the target module; use its Resolution Result for every path below instead of re-deriving them. Refuse to proceed unless the module's `domain.md` and `vocabulary.md` exist. If `repomap.md` is missing entirely (shouldn't happen if `/model-context` was used), stop and say so — this skill only finalizes an existing skeleton, it doesn't create one.
+Invoke `/dddintern-discover-bounded-context` with `$ARGUMENTS` to resolve the target module; use its Resolution Result for every path below instead of re-deriving them. Refuse to proceed unless the module's `domain.md` and `vocabulary.md` exist. If `repomap.md` is missing entirely (shouldn't happen if `/ddd-map-modules` was used), stop and say so — this skill only finalizes an existing skeleton, it doesn't create one.
 
 ## Goal
 
@@ -30,7 +30,7 @@ Produce `plan.md` for the module, and finalize its `repomap.md`: write the real 
 
 2. Read `specs/Constitution.md`, if it exists, for project-wide principles this plan must satisfy.
 
-3. Have a technical conversation with the user covering `.dddkit/templates/plan-template.md`'s Technical Context fields (language/version, primary dependencies, storage, testing, performance goals, constraints) — use `[NEEDS CLARIFICATION: ...]` sparingly, same discipline as `/map-requirements`: only when there's no reasonable default.
+3. Have a technical conversation with the user covering `.dddkit/templates/plan-template.md`'s Technical Context fields (language/version, primary dependencies, storage, testing, performance goals, constraints) — use `[NEEDS CLARIFICATION: ...]` sparingly, same discipline as `/ddd-map-requirements`: only when there's no reasonable default.
 
 4. **Decide `module_kind` and `code_glob`**:
    - `module_kind: file` if the module is a single-responsibility unit with no internal substructure; `module_kind: folder` if it has its own internal layout (handlers, repository, service, etc.).
@@ -56,7 +56,7 @@ Produce `plan.md` for the module, and finalize its `repomap.md`: write the real 
 
 - `plan.md` path, and the finalized `code_glob`/`module_kind`.
 - Constitution Check result (pass, or violations with their Complexity Tracking justification).
-- Suggested next step: `/generate-tasks` for this module.
+- Suggested next step: `/ddd-generate-tasks` for this module.
 
 ## Done When
 

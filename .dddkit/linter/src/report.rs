@@ -1,6 +1,6 @@
 //! Output. Text for humans, JSON for skills, hooks and CI.
 //!
-//! The JSON shape is the contract `/implement` gates on, so `code` values are
+//! The JSON shape is the contract `/ddd-implement` gates on, so `code` values are
 //! stable identifiers rather than prose.
 
 use crate::model::{Concern, Finding, Severity};

@@ -1,18 +1,18 @@
 {
   "integration": "claude",
   "version": "1.0.0",
-  "installed_at": "2026-09-06T04:47:41.648068+00:00",
+  "installed_at": "2026-09-06T05:00:41.259548+00:00",
   "files": {
-    ".claude/skills/checklist/SKILL.md": "dc96b88df3cb283f34d076a7ae936279251d8c169149bd89091cc61ba3024531",
-    ".claude/skills/constitution/SKILL.md": "e2cc972ef572caf704e805f1b08bff7a21f3112ff86db1531255e2ef739703ba",
-    ".claude/skills/discover-bounded-context/SKILL.md": "589268e368d4c2bb87f614204afd10b6f7ad0e9e8afa197e2727e2fbeaaf3a4a",
-    ".claude/skills/generate-tasks/SKILL.md": "b6df61226091422eba695ebf04fcba857fd02d7df9ace4a06e56307ae2163e7a",
-    ".claude/skills/implement/SKILL.md": "985160bbc33dc856d4e0da307bbe2a37e5dde9ba3edf5041d3913ccce56cbb80",
-    ".claude/skills/implement-progress/SKILL.md": "d42944706cda7bc526a827afbc21816f55aab9921791220205827c09cff4a3b6",
-    ".claude/skills/interview/SKILL.md": "91377f2060ff4315cca67c4ed53d554e6e2e03f9bf8c599647c34573271f514f",
-    ".claude/skills/map-contexts/SKILL.md": "94a1c1242d8168f11792399c9eba5f056fe7ff018bcb195ab7cff15f6c93cd6d",
-    ".claude/skills/map-requirements/SKILL.md": "982630215ddc5c3fbfa89ce6c67afab05b84e0b73321bb4f339f34bcaf24329f",
-    ".claude/skills/model-context/SKILL.md": "b1ad1a8b8e175775a5959351ce19ed5029c9e2fe94c1fb16a5b0335d5ec509dc",
-    ".claude/skills/plan-context/SKILL.md": "2a13451e3252c63b2635f73c283660a9e1403731fb020fd3fca900602c4e9b31"
+    ".claude/skills/ddd-checklist/SKILL.md": "5bea11b5936427218e8ab17c35f652d05e85346a7dd9f1683cd103641016782a",
+    ".claude/skills/ddd-constitution/SKILL.md": "a86d7bef466ea440f39397c04ae3a86c393e6650bceac5d0f8fa57c78d1104ff",
+    ".claude/skills/ddd-generate-tasks/SKILL.md": "e0c0819976cde9db71e2942e4a86a91b89212a9cd07e0b70daddfd94a262b3e4",
+    ".claude/skills/ddd-go-planning/SKILL.md": "9ba73a724bbbca84d0cc819a43299f1e511734b56acc1b4fa509f3fe4eb43635",
+    ".claude/skills/ddd-implement/SKILL.md": "bd036a7a6e764bd889a4fa137ea3b5ddb068a02de380d2c88746b6179d832e1d",
+    ".claude/skills/ddd-implement-progress/SKILL.md": "1bfd3eb7dd8802fee1032c096588a6b2725b680c96c9d967d63470272b176c44",
+    ".claude/skills/ddd-interview/SKILL.md": "697cb3b4cd184765de581f7cf9cd4192f7d19541d427530a42e519426f9edf93",
+    ".claude/skills/ddd-map-contexts/SKILL.md": "8688b249b1fffcf1066471d081095d0cf8e0d903794ed7ddc797dbeb128110e3",
+    ".claude/skills/ddd-map-modules/SKILL.md": "7920dca8caf6a3e14b0532e9712a17583f7fdc2d666624661e5da35a972015e1",
+    ".claude/skills/ddd-map-requirements/SKILL.md": "27903775c7cd31c008904472ed551f3d474c2311d6ddd3dc221d8363b4f1f784",
+    ".claude/skills/dddintern-discover-bounded-context/SKILL.md": "fcb119c12bd8fc8ad509d1b8c802fce6ee0eb26d168a32ee1b1903b6e69e81c2"
   }
 }

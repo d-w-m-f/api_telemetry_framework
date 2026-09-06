@@ -200,7 +200,7 @@ fn check_module(
                 Severity::Pending,
                 "module-not-implemented",
                 format!(
-                    "{} has no finalized repomap.md pointer and no code yet. Run /plan-context, then /implement.",
+                    "{} has no finalized repomap.md pointer and no code yet. Run /ddd-go-planning, then /ddd-implement.",
                     m.reference()
                 ),
             )
@@ -248,8 +248,8 @@ fn check_module(
         // project. Two genuinely different situations share that shape, and
         // conflating them makes the linter red during normal development:
         //
-        //   - the declared location does not exist at all. /plan-context
-        //     finalizes the pointer *before* /implement writes any code, so
+        //   - the declared location does not exist at all. /ddd-go-planning
+        //     finalizes the pointer *before* /ddd-implement writes any code, so
         //     every module legitimately passes through this state. Pending.
         //   - the declared location exists, but nothing under it carries the
         //     uuid. There is code here that lost (or never had) its SdSFC
@@ -268,7 +268,7 @@ fn check_module(
                         Severity::Pending,
                         "module-not-implemented",
                         format!(
-                            "{} is planned at '{}' but nothing exists there yet. Run /generate-tasks, then /implement.",
+                            "{} is planned at '{}' but nothing exists there yet. Run /ddd-generate-tasks, then /ddd-implement.",
                             m.reference(),
                             glob
                         ),

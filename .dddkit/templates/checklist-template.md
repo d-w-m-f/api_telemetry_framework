@@ -11,7 +11,7 @@ status: draft
 **Target**: [Module path or project-wide artifact this checklist reviews]
 
 **Review Ownership**: This is a reviewer-owned requirements-quality review artifact. Mark an item `[x]` only when a reviewer determines the criterion is satisfied.
-**Marker Semantics**: `[x]` means the criterion has been reviewed and satisfied. It does **not** mean implementation work is complete. `/implement` treats unchecked items as a gate and must never modify these markers itself.
+**Marker Semantics**: `[x]` means the criterion has been reviewed and satisfied. It does **not** mean implementation work is complete. `/ddd-implement` treats unchecked items as a gate and must never modify these markers itself.
 
 <!--
   ACTION REQUIRED: Replace the categories/items below with real ones derived

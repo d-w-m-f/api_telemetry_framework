@@ -5,17 +5,26 @@ removed or redefined.)
 Modified principles:
   - "1. Core Directory Rules" -> the dirmap now shows the whole of specs/, not
     just BoundedContexts/. `Brainstorm/` and `Constitution.md` have existed and
-    been written by the pipeline since /interview and /map-requirements were
+    been written by the pipeline since /ddd-interview and /ddd-map-requirements were
     implemented, but neither appeared here, so the constitution described a
     subset of the tree it governs.
   - "1.2 Naming Rules and Levels" -> adds the rule for top-level directories
     under specs/ (PascalCase), which was previously implicit in the single
     example `BoundedContexts/` and had produced a lowercase `brainstorm/`.
-  - "1.1 Dirmap", .dddkit/ block -> adds PIPELINE.md (new this revision) and
-    linter/ (present since the Rust port), neither of which was listed.
+  - "1.1 Dirmap", .dddkit/ block -> adds linter/ (present since the Rust port)
+    but never listed, and names PIPELINE.md at the repo root, noting that its
+    location leaves it outside the integrity manifest.
+  - "3. The SdSFC Pattern", item 4 -> skill reference renamed
+    (discover-bounded-context -> /dddintern-discover-bounded-context).
+  - "5. Versioning Convention" -> skill reference renamed
+    (/constitution -> /ddd-constitution).
 Added sections: none
 Removed sections: none
-Propagated to: specs/brainstorm/ -> specs/Brainstorm/ (renamed), and every live
+Propagated to: the 2026-09-06 skill rename (all pipeline skills prefixed ddd-,
+  the internal resolver prefixed dddintern-, model-context -> ddd-map-modules,
+  plan-context -> ddd-go-planning) across every live reference in .dddkit/,
+  .claude/skills/, specs/, .issues/ and CLAUDE.md; and
+  specs/brainstorm/ -> specs/Brainstorm/ (renamed), with every live
   reference to it (.dddkit/headers.yaml, .dddkit/templates/interview-template.md,
   .claude/skills/{interview,map-requirements,map-contexts,generate-tasks}/SKILL.md,
   specs/Constitution.md, specs/Brainstorm/interview.md,
@@ -101,11 +110,11 @@ The root of these specifications is `specs/`. Inside it live the project's own `
 specs/
 ├── Constitution.md            # The project's own engineering principles
 ├── Brainstorm/                # Pre-domain material: what is being built, and why
-│   ├── interview.md           #   /interview      - free-form capture
-│   └── requirements.md        #   /map-requirements - FR-###/NFR-###
-├── checklists/                # Optional, project-wide checklists (/checklist)
+│   ├── interview.md           #   /ddd-interview      - free-form capture
+│   └── requirements.md        #   /ddd-map-requirements - FR-###/NFR-###
+├── checklists/                # Optional, project-wide checklists (/ddd-checklist)
 └── BoundedContexts/           # Entry point for domain specs
-    ├── contexts.md            # The context map (/map-contexts)
+    ├── contexts.md            # The context map (/ddd-map-contexts)
     ├── ContextA/               # PascalCase for Bounded Contexts
     │   ├── module-one/         # kebab-case for Modules
     │   │   ├── domain.md
@@ -119,17 +128,23 @@ specs/
 ├── DDD.md                     # THIS FILE (the Constitution)
 ├── headers.yaml               # Expected frontmatter per document type
 ├── shared_language.md         # Global ubiquitous language
-├── PIPELINE.md                # The skills, and the workflows they compose into
 ├── index.json                 # Generated: uuid -> {spec_path, code_path} cache
 ├── templates/                 # Templates for AI-generated artifacts
 ├── scripts/                   # Deterministic code (scaffolding, validation, indexing)
 ├── linter/                    # The Rust linter (source; build output is not committed)
 └── integrations/              # Integration manifests (file hashes)
+
+PIPELINE.md                    # (repo root) The skills, and the workflows they compose into
 ```
+
+`PIPELINE.md` sits at the repo root rather than under `.dddkit/`, so it is **not**
+covered by the integrity manifest: it can be edited without regenerating hashes,
+and equally can drift without anything noticing. It describes the pipeline; this
+file governs it.
 
 ### 1.2 Naming Rules and Levels
 
-- **Top-level directories under `specs/`:** Named in `PascalCase` (`Brainstorm/`, `BoundedContexts/`). They are structural, not domain — one per kind of spec material, never one per domain concept. `specs/checklists/` is a pre-existing exception, not a pattern to copy: `/checklist` writes there in lowercase. It is recorded here as-is rather than silently renamed, since renaming it would break that skill.
+- **Top-level directories under `specs/`:** Named in `PascalCase` (`Brainstorm/`, `BoundedContexts/`). They are structural, not domain — one per kind of spec material, never one per domain concept. `specs/checklists/` is a pre-existing exception, not a pattern to copy: `/ddd-checklist` writes there in lowercase. It is recorded here as-is rather than silently renamed, since renaming it would break that skill.
 - **Bounded Contexts:** Named in `PascalCase` (e.g. `LabExperiments`, `ReferenceDomain`). Sit directly under `BoundedContexts/`.
 - **Modules:** Named in `kebab-case` (e.g. `catalog-service`, `order-processing`). A module represents one subdomain and contains `domain.md`, `vocabulary.md`, and `repomap.md`.
 - **Logical Folders:** Wrapped in brackets (e.g. `[infrastructure]`, `[core]`). May exist **only** two or more levels below `BoundedContexts/`. They cannot contain domain markdown files directly — they only group modules.
@@ -158,7 +173,7 @@ The heart of DDD-Kit is keeping high-level documentation (here, under `specs/`) 
    - `code_glob`: a wildcard pointing at where the module lives in the real codebase (e.g. `src/**/catalog/`).
    - `module_kind`: `folder` or `file` — whether the module is implemented as a directory or a single file.
 3. **The business rule lives with the code.** Inside the directory resolved by `code_glob`, there MUST exist a business-rule markdown file: `business-rules.md` when `module_kind: folder`, or a markdown file sharing the module's file name when `module_kind: file`. This keeps the fine-grained detail (data flows, specific validations, edge cases) right next to the code a developer is reading.
-4. **UUID resolution is the source of truth.** `.dddkit/index.json` is a committed, script-generated cache mapping every module's `uuid` to its current `spec_path` and `code_path` (resolved from `repomap.md`'s `code_glob`). Agents, scripts, and skills (most directly `discover-bounded-context`, which every other pipeline skill invokes to resolve a module) resolve a module through this index, not by re-globbing `code_glob` live or by trusting a hardcoded path. Moving a directory on disk is safe as long as the index is rebuilt afterwards — the `uuid` never changes.
+4. **UUID resolution is the source of truth.** `.dddkit/index.json` is a committed, script-generated cache mapping every module's `uuid` to its current `spec_path` and `code_path` (resolved from `repomap.md`'s `code_glob`). Agents, scripts, and skills (most directly `/dddintern-discover-bounded-context`, which every other pipeline skill invokes to resolve a module) resolve a module through this index, not by re-globbing `code_glob` live or by trusting a hardcoded path. Moving a directory on disk is safe as long as the index is rebuilt afterwards — the `uuid` never changes.
 5. **Deterministic validation.** `.dddkit/scripts/validate-ddd.py` walks the specs, verifies `.dddkit/index.json` is not stale relative to the real `domain.md`/`repomap.md` files, confirms every resolved `code_path` has its business-rule file, checks every `context-map.md` entry has a matching (and no orphaned) folder under `BoundedContexts/`, and confirms `module_kind` matches what is actually on disk. A failing validation breaks the pipeline (or blocks the commit).
 
 ## 4. On Conflicts and AI Behavior
@@ -168,7 +183,7 @@ The heart of DDD-Kit is keeping high-level documentation (here, under `specs/`) 
 
 ## 5. Versioning Convention
 
-Every document type in `headers.yaml` carries a `version` field. A bare number is not enough — this section fixes *when* to bump which part, extending the rule `Constitution.md` and this file already follow (see `.claude/skills/constitution/SKILL.md`) to every other versioned document:
+Every document type in `headers.yaml` carries a `version` field. A bare number is not enough — this section fixes *when* to bump which part, extending the rule `Constitution.md` and this file already follow (see `.claude/skills/ddd-constitution/SKILL.md`) to every other versioned document:
 
 | Doc type | MAJOR | MINOR | PATCH |
 |---|---|---|---|
@@ -179,6 +194,6 @@ Every document type in `headers.yaml` carries a `version` field. A bare number i
 | `interview.md` / `requirements.md` | — (these only ever grow) | A new round/requirement is added | A prior entry is reworded, not replaced |
 | `Constitution.md` / `DDD.md` | Principle removed/redefined incompatibly | Principle added or materially expanded | Wording/clarification only |
 
-A document's **first creation** (going from a template skeleton to its initial real content — e.g. `repomap.md`'s `code_glob` being filled in by `/plan-context` for the first time) is completing v1.0.0, not a bump. Bumps apply to *amending* a document that already has real content.
+A document's **first creation** (going from a template skeleton to its initial real content — e.g. `repomap.md`'s `code_glob` being filled in by `/ddd-go-planning` for the first time) is completing v1.0.0, not a bump. Bumps apply to *amending* a document that already has real content.
 
 **Sync Impact Report threshold**: prepend a Sync Impact Report (version change, modified/added/removed content, deferred TODOs — see the one at the top of this file) for every MINOR or MAJOR bump. Skip it for PATCH-only changes, to avoid noise on pure wording fixes. New reports are prepended above older ones — never delete a prior report when adding a new one.

@@ -17,7 +17,7 @@ last_amended: [LAST_AMENDED_DATE]
 
 # [PROJECT_NAME] Constitution
 
-This is the project's own engineering constitution — distinct from `.dddkit/DDD.md`, which governs how DDD modeling itself is done and is not edited through this document. Amended exclusively through `/constitution` after the first draft.
+This is the project's own engineering constitution — distinct from `.dddkit/DDD.md`, which governs how DDD modeling itself is done and is not edited through this document. Amended exclusively through `/ddd-constitution` after the first draft.
 
 ## Core Principles
 

@@ -48,7 +48,7 @@ Checked against `specs/Constitution.md` v1.0.0 and `.dddkit/DDD.md` section 3.
 | III. Identical Starting State | **PASS** | Schema creation is `create_all` (idempotent by construction); the reset operation truncates and re-seeds from a literal, ordered fixture list, so two resets are byte-identical. |
 | IV. Concurrency Enforced by the Database | **PASS** | Stock is guarded by a `CHECK (stock_quantity >= 0)` constraint at the column level. This module contributes the constraint; `orders` contributes the atomic statement that respects it. No read-then-decide path exists in this module, which performs no writes to stock at all. |
 | V. Machine-Readable Failure Modes | **PASS** | Both read endpoints answer `404` with a stable `error_code` body for unknown or non-sellable SKUs; page-size violations answer `422` with their own code. |
-| `DDD.md` §3 (SdSFC) | **PASS** | `code_glob` resolves to a directory owned entirely by this project, into which `business-rules.md` is written by `/implement`. Nothing vendored or third-party is involved. |
+| `DDD.md` §3 (SdSFC) | **PASS** | `code_glob` resolves to a directory owned entirely by this project, into which `business-rules.md` is written by `/ddd-implement`. Nothing vendored or third-party is involved. |
 
 Re-checked after drafting: no gate changed status.
 

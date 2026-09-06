@@ -7,7 +7,7 @@ status: draft
 
 # Roadmap: [MODULE_NAME]
 
-Created because this module's `tasks.md` is too large for one `/implement` session. Splits it into phases that can each be completed and checkpointed independently. If `tasks.md` fits in one session, this file doesn't need to exist at all — `/implement-progress` falls back to reading `tasks.md` directly when there's no roadmap.
+Created because this module's `tasks.md` is too large for one `/ddd-implement` session. Splits it into phases that can each be completed and checkpointed independently. If `tasks.md` fits in one session, this file doesn't need to exist at all — `/ddd-implement-progress` falls back to reading `tasks.md` directly when there's no roadmap.
 
 ## Phases
 
@@ -20,5 +20,5 @@ Created because this module's `tasks.md` is too large for one `/implement` sessi
 
 ## Notes
 
-- `/implement` updates the Status/Session Notes columns as it completes each phase — never the checkbox state in `tasks.md` beyond marking tasks `[X]` as it goes.
-- `/implement-progress` reads this file when present, and reports a flat `tasks.md` tally when it isn't.
+- `/ddd-implement` updates the Status/Session Notes columns as it completes each phase — never the checkbox state in `tasks.md` beyond marking tasks `[X]` as it goes.
+- `/ddd-implement-progress` reads this file when present, and reports a flat `tasks.md` tally when it isn't.

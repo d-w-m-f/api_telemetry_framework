@@ -25,7 +25,7 @@ status: draft
 - **SdSFC (Spec-driven Single-File Components)** — see `.dddkit/shared_language.md`. This module's business rules live beside its source, not under `specs/`.
 - **Âncora de Módulo (Module Anchor)** — see `.dddkit/shared_language.md`. This module's anchor is the `business-rules.md` carrying its `implements_uuid`.
 - **Wildcard de Implementação (`code_glob`)** — see `.dddkit/shared_language.md`. A hint for locating this module, not the authority on where it is.
-- **Achado Corrigível vs. Falha (Fixable Finding vs. Failure)** — see `.dddkit/shared_language.md`. Relevant here because this module's spec-to-code link is what the linter checks once `/implement` has run.
+- **Achado Corrigível vs. Falha (Fixable Finding vs. Failure)** — see `.dddkit/shared_language.md`. Relevant here because this module's spec-to-code link is what the linter checks once `/ddd-implement` has run.
 
 ## Notes
 

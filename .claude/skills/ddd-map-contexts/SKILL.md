@@ -1,8 +1,8 @@
 ---
-name: "map-contexts"
+name: "ddd-map-contexts"
 description: "Propose Bounded Contexts from interview.md and requirements.md, and — after explicit approval — write contexts.md and create the context folders."
 argument-hint: "Optional focus, e.g. 'reconsider only the reporting side'"
-compatibility: "Requires a dddkit project (.dddkit/ directory at the repo root); requires at least one /interview and one /map-requirements run"
+compatibility: "Requires a dddkit project (.dddkit/ directory at the repo root); requires at least one /ddd-interview and one /ddd-map-requirements run"
 metadata:
   author: "dddkit"
   source: "plan/005_map-contexts.md"
@@ -22,7 +22,7 @@ Refuse to proceed, and say so plainly, unless **both** exist:
 - `specs/Brainstorm/interview.md`
 - `specs/Brainstorm/requirements.md`
 
-Direct the user to `/interview` and/or `/map-requirements` if either is missing.
+Direct the user to `/ddd-interview` and/or `/ddd-map-requirements` if either is missing.
 
 ## Goal
 
@@ -45,7 +45,7 @@ Identify the project's Bounded Contexts from `interview.md` + `requirements.md`,
 
 5. **On approval, apply only additive changes**:
    - Append new Bounded Context subsections to `contexts.md` (or create the file from `.dddkit/templates/context-map.md` if it doesn't exist yet) — every context name backtick-wrapped, matching the existing convention.
-   - Create missing `PascalCase` folders under `specs/BoundedContexts/` — folders only, no `domain.md`/`vocabulary.md`/module content. That is `/model-context`'s job.
+   - Create missing `PascalCase` folders under `specs/BoundedContexts/` — folders only, no `domain.md`/`vocabulary.md`/module content. That is `/ddd-map-modules`'s job.
    - **Never** rewrite, rename, merge, or delete an existing context's subsection or folder in this step, even if the approved proposal implied a rename — if the user wants an existing context renamed or merged, that is a manual migration outside this skill's scope; say so explicitly rather than attempting it.
    - **Version the file**: new file, `version: 1.0.0`. Appending to an existing `contexts.md` is a MINOR bump (`DDD.md` section 5: adding a Bounded Context is MINOR) — bump it and prepend a Sync Impact Report noting which context(s) were added and which drift items were reconciled. A run that only reconciles drift (adds a missing entry/folder for something that already existed) without introducing a brand-new context is still a MINOR bump — the file's content changed, even if no new concept did.
 
@@ -60,7 +60,7 @@ Identify the project's Bounded Contexts from `interview.md` + `requirements.md`,
 
 - The approved context list (new + reconciled), and which folders were created.
 - Any proposal the user did not approve, left for a future run.
-- Suggested next step: `/model-context` for each new context.
+- Suggested next step: `/ddd-map-modules` for each new context.
 
 ## Done When
 

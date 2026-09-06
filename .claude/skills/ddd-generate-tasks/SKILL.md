@@ -1,5 +1,5 @@
 ---
-name: "generate-tasks"
+name: "ddd-generate-tasks"
 description: "Break a module's plan.md into an ordered, aggregate-organized tasks.md."
 argument-hint: "The Bounded Context and module to generate tasks for"
 compatibility: "Requires a dddkit project (.dddkit/ directory at the repo root); the target module must already have plan.md"
@@ -18,7 +18,7 @@ $ARGUMENTS
 
 ## Prerequisites
 
-Invoke `/discover-bounded-context` with `$ARGUMENTS` to resolve the target module. Refuse to proceed unless `plan.md` exists for it; if it doesn't, say so and suggest `/plan-context` first.
+Invoke `/dddintern-discover-bounded-context` with `$ARGUMENTS` to resolve the target module. Refuse to proceed unless `plan.md` exists for it; if it doesn't, say so and suggest `/ddd-go-planning` first.
 
 ## Goal
 
@@ -47,7 +47,7 @@ Produce `tasks.md` for the module: a concrete, dependency-ordered, ideally-paral
 
 - `tasks.md` path and phase count.
 - Confirmation the business-rule file task is present for every Aggregate phase.
-- Suggested next step: `/implement`.
+- Suggested next step: `/ddd-implement`.
 
 ## Done When
 

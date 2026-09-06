@@ -8,7 +8,7 @@ status: draft
 
 <!--
   This file grows by APPENDING a new "## Round N" section each time
-  /interview runs again — never rewrite or delete a prior round's answers.
+  /ddd-interview runs again — never rewrite or delete a prior round's answers.
   Bump the version (MINOR) whenever a round adds real new material; PATCH
   only for a pure wording correction to something already recorded.
 -->
@@ -33,5 +33,5 @@ status: draft
 
 ## Notes
 
-- This file is free-form capture, not structured requirements — do not restructure it into FR-###/NFR-### form here. That happens in `/map-requirements`, producing `specs/Brainstorm/requirements.md`.
-- Do not name or propose Bounded Contexts here. That happens in `/map-contexts`, gated by `DDD.md` section 4 (explicit human approval required).
+- This file is free-form capture, not structured requirements — do not restructure it into FR-###/NFR-### form here. That happens in `/ddd-map-requirements`, producing `specs/Brainstorm/requirements.md`.
+- Do not name or propose Bounded Contexts here. That happens in `/ddd-map-contexts`, gated by `DDD.md` section 4 (explicit human approval required).

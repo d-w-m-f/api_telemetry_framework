@@ -41,13 +41,13 @@ For every module, reads its `repomap.md` frontmatter (`code_glob`, `module_kind`
 - Checks for the business-rule file at that location: `business-rules.md` inside the resolved directory for `module_kind: folder`, or a same-named `.md` file next to it for `module_kind: file`.
 - **Warns, without failing**, when that file's identity frontmatter (`bounded_context`, `module`, `module_kind` — required by `headers.yaml`) is missing or disagrees with the spec side. Those three fields are copies of `domain.md`/`repomap.md`, so a disagreement is a Fixable Finding per `shared_language.md` section 5: rebuildable from the source of truth without a human decision, and therefore not something that should break a build.
 
-**Fix**: run `/plan-context` if `code_glob`/`module_kind` aren't finalized yet; otherwise write the missing business-rule file (this is what `/implement` does automatically as it writes code). For an identity warning, `dddkit check --fix` rewrites the fields from the spec.
+**Fix**: run `/ddd-go-planning` if `code_glob`/`module_kind` aren't finalized yet; otherwise write the missing business-rule file (this is what `/ddd-implement` does automatically as it writes code). For an identity warning, `dddkit check --fix` rewrites the fields from the spec.
 
 ### 3. `context-map.md` ↔ `BoundedContexts/` folders
 
 Extracts every backtick-wrapped, PascalCase Bounded Context name (`` `LikeThis` ``) found anywhere in `specs/BoundedContexts/contexts.md`, and separately lists every `PascalCase`-named folder directly under `specs/BoundedContexts/`. Reports both directions of mismatch: a name with no folder, and a folder with no name. This is a plain-text regex scan (`` `([A-Z][A-Za-z0-9]*)` ``), not a structured parse — the convention it relies on is "wrap the name in backticks somewhere in that context's section," not a specific heading format.
 
-**Fix**: run `/map-contexts` — it now knows how to propose exactly this kind of reconciliation (additive only, human-approved).
+**Fix**: run `/ddd-map-contexts` — it now knows how to propose exactly this kind of reconciliation (additive only, human-approved).
 
 ### 4 & 5. Manifest integrity (`dddkit.manifest.json`, `claude.manifest.json`)
 
@@ -74,5 +74,5 @@ All three share the same zero-config, `__file__`-relative root resolution as the
 
 - No way to run a single check or scope validation to one module/context — always the whole repo, all 5 checks.
 - No machine-readable output (no `--json`) — anything consuming its result today has to parse the exit code and/or grep stdout.
-- Not wired into any git hook or CI pipeline in this repo — running it is currently the caller's responsibility (several skills, like `/implement`, run it explicitly as their own final step).
+- Not wired into any git hook or CI pipeline in this repo — running it is currently the caller's responsibility (several skills, like `/ddd-implement`, run it explicitly as their own final step).
 - Frontmatter is read via a deliberately minimal flat `key: value` scanner (`_common.parse_frontmatter`), not a real YAML parser — this is fine because DDD-Kit frontmatter is never nested, but it means a malformed or nested frontmatter block fails silently (returns `{}` / missing fields) rather than raising a parse error.

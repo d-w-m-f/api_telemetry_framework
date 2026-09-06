@@ -1,5 +1,5 @@
 ---
-name: "implement-progress"
+name: "ddd-implement-progress"
 description: "Report a module's implementation progress: task completion, roadmap phase status, and SdSFC compliance. Read-only."
 argument-hint: "The Bounded Context and module to check"
 compatibility: "Requires a dddkit project (.dddkit/ directory at the repo root); the target module must have tasks.md"
@@ -22,7 +22,7 @@ Report where a module's implementation stands. **Strictly read-only** — this s
 
 ## Outline
 
-1. Invoke `/discover-bounded-context` with `$ARGUMENTS` to resolve the target module. If `tasks.md` doesn't exist for it, say so and suggest `/generate-tasks` — there's nothing to report yet.
+1. Invoke `/dddintern-discover-bounded-context` with `$ARGUMENTS` to resolve the target module. If `tasks.md` doesn't exist for it, say so and suggest `/ddd-generate-tasks` — there's nothing to report yet.
 
 2. **If `roadmap.md` exists**: report its phase table as-is (Phase, `tasks.md` Range, Status, Session Notes), plus a raw checkbox tally per phase's task range from `tasks.md` itself, so the two can be cross-checked.
 
@@ -35,7 +35,7 @@ Report where a module's implementation stands. **Strictly read-only** — this s
    | [Aggregate] | 5 | 3 | 2 | IN PROGRESS |
    ```
 
-4. **SdSFC status line**: check whether the business-rule file(s) `repomap.md` implies (`business-rules.md` or the file-module equivalent) actually exist at the resolved `code_glob` location. Report this alongside the task tally — "tasks done" and "SdSFC-compliant" are both meaningful and cheap to check together; don't make the user run `/implement` again just to find out the second one is still missing.
+4. **SdSFC status line**: check whether the business-rule file(s) `repomap.md` implies (`business-rules.md` or the file-module equivalent) actually exist at the resolved `code_glob` location. Report this alongside the task tally — "tasks done" and "SdSFC-compliant" are both meaningful and cheap to check together; don't make the user run `/ddd-implement` again just to find out the second one is still missing.
 
 ## Behavioral Rules
 
@@ -44,7 +44,7 @@ Report where a module's implementation stands. **Strictly read-only** — this s
 
 ## Completion Report
 
-The status table(s) above, plus the SdSFC status line, plus a one-line overall verdict (e.g. "3 of 5 tasks done, business-rule file missing — run `/implement` to continue").
+The status table(s) above, plus the SdSFC status line, plus a one-line overall verdict (e.g. "3 of 5 tasks done, business-rule file missing — run `/ddd-implement` to continue").
 
 ## Done When
 

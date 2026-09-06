@@ -1,5 +1,5 @@
 ---
-name: "map-requirements"
+name: "ddd-map-requirements"
 description: "Interview the user to extract testable functional and non-functional requirements into specs/Brainstorm/requirements.md, seeding the project Constitution on first run."
 argument-hint: "Optional focus area for this requirements pass"
 compatibility: "Requires a dddkit project (.dddkit/ directory at the repo root)"
@@ -18,7 +18,7 @@ $ARGUMENTS
 
 ## Goal
 
-Extract testable, unambiguous functional and non-functional requirements into `specs/Brainstorm/requirements.md`. Unlike `/interview` (free-form capture of "what to build"), this skill's output must be structured and verifiable: "what the system must satisfy." On its first run in a project, also seed `specs/Constitution.md` from whatever durable, project-wide principles surfaced.
+Extract testable, unambiguous functional and non-functional requirements into `specs/Brainstorm/requirements.md`. Unlike `/ddd-interview` (free-form capture of "what to build"), this skill's output must be structured and verifiable: "what the system must satisfy." On its first run in a project, also seed `specs/Constitution.md` from whatever durable, project-wide principles surfaced.
 
 ## Outline
 
@@ -37,19 +37,19 @@ Extract testable, unambiguous functional and non-functional requirements into `s
 
 5. **Constitution seeding** — check whether `specs/Constitution.md` already exists:
    - **If it does not exist**: extract only the principles that are genuinely project-wide and durable (e.g. "all public endpoints require authentication", "p95 latency under 200ms") — not feature-specific requirements, which stay in `requirements.md`. Present the extracted principles to the user for confirmation/edits, then write `specs/Constitution.md` using `.dddkit/templates/constitution-template.md`, version `1.0.0`, with a Sync Impact Report noting this as the initial ratification.
-   - **If it already exists**: do not touch it. Note in your completion report that further amendments go through `/constitution`.
+   - **If it already exists**: do not touch it. Note in your completion report that further amendments go through `/ddd-constitution`.
 
 ## Behavioral Rules
 
-- This skill does **not** produce a requirements-quality checklist as a byproduct — that is `/checklist`'s job, run separately if the user wants one.
-- Never bump `specs/Constitution.md`'s version after its initial creation here — only `/constitution` owns amendments from that point on.
+- This skill does **not** produce a requirements-quality checklist as a byproduct — that is `/ddd-checklist`'s job, run separately if the user wants one.
+- Never bump `specs/Constitution.md`'s version after its initial creation here — only `/ddd-constitution` owns amendments from that point on.
 
 ## Completion Report
 
 - Requirements file path, version, and count of requirements added this run.
 - Any unresolved `[NEEDS CLARIFICATION]` markers (should be zero unless the cap was hit and some were deferred).
 - Whether `Constitution.md` was created this run, already existed, or doesn't exist yet (and why, if requirements didn't surface any durable principle).
-- Suggested next step: `/map-contexts` once at least one `/interview` and one `/map-requirements` run exist.
+- Suggested next step: `/ddd-map-contexts` once at least one `/ddd-interview` and one `/ddd-map-requirements` run exist.
 
 ## Done When
 

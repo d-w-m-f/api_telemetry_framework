@@ -1,5 +1,5 @@
 ---
-name: "discover-bounded-context"
+name: "dddintern-discover-bounded-context"
 description: "Resolve a module reference (uuid, Context/module pair, or bare module name) to its spec files, code location, and business-rule-file path."
 argument-hint: "A module uuid, 'BoundedContext/module', or just 'module' if unambiguous"
 compatibility: "Requires a dddkit project (.dddkit/ directory at the repo root)"
@@ -18,7 +18,7 @@ $ARGUMENTS
 
 ## Goal
 
-Given a module reference, resolve it to the concrete file set another skill (or a human) needs: the module's spec folder, `domain.md`, `vocabulary.md`, `repomap.md`'s `code_glob`/`module_kind`/resolved `code_path`, and the expected business-rule-file path — whether or not that last one exists yet. This skill only **locates**; it never modifies a module or acts on it. Other skills in the SDK (`/plan-context`, `/generate-tasks`, `/implement`, `/implement-progress`) invoke this skill to resolve their target module instead of independently re-deriving paths — if you are one of those skills, invoke this one and use its Resolution Result rather than repeating this logic inline.
+Given a module reference, resolve it to the concrete file set another skill (or a human) needs: the module's spec folder, `domain.md`, `vocabulary.md`, `repomap.md`'s `code_glob`/`module_kind`/resolved `code_path`, and the expected business-rule-file path — whether or not that last one exists yet. This skill only **locates**; it never modifies a module or acts on it. Other skills in the SDK (`/ddd-go-planning`, `/ddd-generate-tasks`, `/ddd-implement`, `/ddd-implement-progress`) invoke this skill to resolve their target module instead of independently re-deriving paths — if you are one of those skills, invoke this one and use its Resolution Result rather than repeating this logic inline.
 
 ## Outline
 
@@ -38,7 +38,7 @@ Given a module reference, resolve it to the concrete file set another skill (or 
 
 4. **Cross-check freshness**: compare the resolved module's `domain.md` uuid/path against `.dddkit/index.json`. If the index doesn't have it, or its recorded `spec_path` doesn't match, run `python3 .dddkit/scripts/build-index.py` once before reporting — a stale index should never silently produce a wrong path.
 
-5. **Read `repomap.md`** for `code_glob`/`module_kind`. If they're still template placeholders (module hasn't been through `/plan-context` yet), report that explicitly rather than attempting to resolve a placeholder as if it were a real glob.
+5. **Read `repomap.md`** for `code_glob`/`module_kind`. If they're still template placeholders (module hasn't been through `/ddd-go-planning` yet), report that explicitly rather than attempting to resolve a placeholder as if it were a real glob.
 
 6. **Derive the business-rule-file path**: `<resolved code_path>/business-rules.md` for `module_kind: folder`, or `<resolved code_path minus extension>.md` for `module_kind: file`. Report it either way, noting whether it currently exists.
 
@@ -50,7 +50,7 @@ Given a module reference, resolve it to the concrete file set another skill (or 
    - domain.md:   <path> (read it for aggregates/invariants)
    - vocabulary.md: <path>
    - repomap.md:  module_kind=<folder|file|UNRESOLVED>, code_glob=<glob|UNRESOLVED>
-   - code_path:   <resolved path, or "unresolved - run /plan-context first">
+   - code_path:   <resolved path, or "unresolved - run /ddd-go-planning first">
    - business-rule file: <path> (exists|missing)
    ```
 

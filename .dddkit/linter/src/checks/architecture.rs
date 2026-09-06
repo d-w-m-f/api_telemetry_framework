@@ -3,7 +3,7 @@
 //! Every Bounded Context named in contexts.md must have a folder, and every
 //! folder must be named in contexts.md. Neither direction may have orphans.
 //!
-//! Nothing here is auto-fixable: reconciling this is /map-contexts' job, and
+//! Nothing here is auto-fixable: reconciling this is /ddd-map-contexts' job, and
 //! it sits behind an explicit human approval gate (DDD.md section 4).
 
 use crate::model::{Concern, Finding, Severity};
@@ -65,7 +65,7 @@ pub fn run(root: &Path) -> Vec<Finding> {
                 "context-folder-missing",
                 format!("'{name}' is named in contexts.md but has no folder at specs/BoundedContexts/{name}/."),
             )
-            .fix_hint("run /map-contexts to reconcile (additive, human-approved)"),
+            .fix_hint("run /ddd-map-contexts to reconcile (additive, human-approved)"),
         );
     }
     for name in actual.difference(&mapped) {
@@ -76,7 +76,7 @@ pub fn run(root: &Path) -> Vec<Finding> {
                 "context-unmapped",
                 format!("specs/BoundedContexts/{name}/ exists but '{name}' is not named in contexts.md."),
             )
-            .fix_hint("run /map-contexts to reconcile (additive, human-approved)"),
+            .fix_hint("run /ddd-map-contexts to reconcile (additive, human-approved)"),
         );
     }
 

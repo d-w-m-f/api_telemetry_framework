@@ -1,5 +1,5 @@
 ---
-name: "checklist"
+name: "ddd-checklist"
 description: "Generate a custom, on-demand quality checklist for a module or project-wide artifact."
 argument-hint: "What to check and what it targets, e.g. 'testability of the catalog module's requirements'"
 compatibility: "Requires a dddkit project (.dddkit/ directory at the repo root)"
@@ -42,13 +42,13 @@ Generate a checklist reviewing a specific concern (testability, security, UX, wh
 ## Behavioral Rules
 
 - This skill only ever writes checklist items, never checks any box itself — `[x]` is reserved for a human (or a separate, explicit review pass) to set.
-- Never place a project-wide checklist under a module's `checklists/` directory, or vice versa — the two locations exist so `/implement` (once built) can find exactly the checklists relevant to the module it's working on without also picking up unrelated project-wide ones.
+- Never place a project-wide checklist under a module's `checklists/` directory, or vice versa — the two locations exist so `/ddd-implement` (once built) can find exactly the checklists relevant to the module it's working on without also picking up unrelated project-wide ones.
 
 ## Completion Report
 
 - The checklist's file path and item count.
 - A one-line summary of what it reviews.
-- Reminder that checking items off is a manual/reviewer step, not something to expect from `/implement` automatically.
+- Reminder that checking items off is a manual/reviewer step, not something to expect from `/ddd-implement` automatically.
 
 ## Done When
 
