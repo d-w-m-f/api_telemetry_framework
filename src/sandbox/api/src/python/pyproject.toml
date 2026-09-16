@@ -1,0 +1,20 @@
+[project]
+name = "python"
+version = "0.1.0"
+description = "Python's api submodule for API telemetry framework"
+authors = [
+    {name = "d-w-m-f",email = "derick.william.moraes@gmail.com"}
+]
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+]
+
+
+[tool.poetry]
+package-mode = false
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
