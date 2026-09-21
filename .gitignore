@@ -2,3 +2,10 @@
 
 .claudeignore/*
 !.claudeignore/.keep
+
+# Build artifacts (per-app tooling already covers most of this; these are the repo-wide catch-alls)
+target/
+__pycache__/
+*.pyc
+dist/
+node_modules/

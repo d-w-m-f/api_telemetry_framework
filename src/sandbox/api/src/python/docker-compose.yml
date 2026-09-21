@@ -1,0 +1,83 @@
+# Full 3-layer sandbox for the python + fastapi_async stack (see spec/bootstrap.md's "MVP decisions" and
+# CLAUDE.md's "Writing Sandbox APIs" section). The telemetry consumer invokes this file directly:
+#
+#   docker compose -f src/sandbox/api/src/python/docker-compose.yml up \
+#     --abort-on-container-exit --exit-code-from load_n_telemetry
+#
+# with RUN_ID and MAIN_DB_DSN set in its own environment before the call -- compose interpolates them below.
+# The call's exit code is load_n_telemetry's exit code, which is also the consumer's signal for
+# success/DLQ (see the root CLAUDE.md architecture section).
+#
+# `telemetry-net` must already exist (created by `docker compose -f docker/docker-compose.yml up`) --
+# load_n_telemetry joins it, alongside this project's own default network, so it can reach `maindb` by name
+# to write its results directly into the main DB.
+
+networks:
+  default: {}
+  telemetry-net:
+    external: true
+    name: telemetry-net
+
+services:
+  sandbox-db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: sandbox
+      POSTGRES_PASSWORD: sandbox
+      POSTGRES_DB: sandbox
+    volumes:
+      - ../../db/migrations:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sandbox -d sandbox"]
+      interval: 2s
+      timeout: 3s
+      retries: 20
+
+  sandbox-seed:
+    build:
+      context: ../../../../..
+      dockerfile: src/sandbox/api/db/seed/Dockerfile
+    depends_on:
+      sandbox-db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://sandbox:sandbox@sandbox-db:5432/sandbox
+    command:
+      - >
+        python3 generate.py --profile tiny --out /tmp/seed-data &&
+        psql "$$DATABASE_URL" -v dir=/tmp/seed-data -f load.sql
+
+  sandbox-api:
+    build:
+      context: ../../../../..
+      dockerfile: src/sandbox/api/src/python/src/Dockerfile
+    depends_on:
+      sandbox-seed:
+        condition: service_completed_successfully
+    environment:
+      ENVIRONMENT: local
+      DATABASE_URL: postgresql://sandbox:sandbox@sandbox-db:5432/sandbox
+      DB_DRIVER: asyncpg
+      APP_VARIANT: fastapi_async
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request as u; u.urlopen('http://localhost:8000/health')"]
+      interval: 2s
+      timeout: 3s
+      retries: 20
+
+  load_n_telemetry:
+    build:
+      context: ../../../../..
+      dockerfile: src/sandbox/load_n_telemetry/Dockerfile
+    depends_on:
+      sandbox-api:
+        condition: service_healthy
+    environment:
+      SANDBOX_API_URL: http://sandbox-api:8000
+      MAIN_DB_DSN: ${MAIN_DB_DSN}
+      RUN_ID: ${RUN_ID}
+      LIMIT: "100"
+      REPETITIONS: "50"
+    networks:
+      - default
+      - telemetry-net

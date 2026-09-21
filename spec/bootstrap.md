@@ -29,19 +29,43 @@ Also, We want:
 - Local infra env with docker-compose
 - .claude/rules for writting Angular, Typescript, Python and FastAPI code
 
-## Things to define or clarify:
+## MVP decisions (resolved 2026-09-16)
 
-- packet manager for Java and for Typescript.
-- how to spin the sandbox env.
-- how to collect the telemetry data from the sandbox container environment.
-- further documentation structure.
-- how/where to define de sandbox dabatase layer, and what will be the sandbox API contracts for each test category and type combinations.
-- main database mvp schemas and needs.
-- the test types served at the frontend. By the collected telemetry data, we can separate in different profiles to organize, filter and project graphs and comparisons ate the frontend
-- sandbox api design patterns to garantee code quality, modulatiry and ease of development on the codebase. Im leaning towards factory patterns for
-- Communication contracts between sandbox environments. Communication flows towards the flux: request sandbox -> api sandbox -> database sandbox. Since API and Database are interchangeable, the frontier must be agreed upon a contrac to be implemented. It is also valid between request and api sandbox environments. We need to define a way do define it and to document it.
-- How to acquire infrasctructure flexibility needed to spin custom sandbox environments, what tools to use and what the accomplish.
-- Claude rules for writing for specific Languages and Frameworks
+- **Sandbox spin-up**: each language/framework/DB combination has its own docker-compose file (under its
+  sandbox dir) bringing up all 3 layers (sandbox db + sandbox api + `load_n_telemetry`). The Python consumer
+  shells out to `docker compose -f <file> up`, blocking for the sandbox's full lifetime — the consumer's own
+  liveness during that call is the monitoring mechanism, no separate polling loop needed.
+- **Result handoff**: the backend mints the run UUID at enqueue time (not the consumer — required for
+  `is_completed` to work as a RabbitMQ redelivery guard, see the root `CLAUDE.md` architecture section) and
+  carries it in the message payload. The consumer reuses that same UUID: it inserts a pending row into
+  `telemetry_results` (main DB) keyed by it, and injects the UUID plus main-DB connection info into the
+  sandbox via env vars. `load_n_telemetry` connects directly to the main DB and writes the finished results
+  into that row itself. This means `load_n_telemetry` needs a Postgres client dependency (still no HTTP
+  framework, per `.claude/rules/go.md`). If the sandbox exits non-zero, times out, or otherwise never
+  completes, the consumer detects that from the process exit and writes the failure state + enqueues to
+  `DLQ` itself, since a dead container can't report its own failure.
+- **Sandbox API contracts**: defined as OpenAPI specs, one per test type, under `spec/contracts/` (MVP needs
+  just one: the "simple read, 100 rows" contract). Every language's sandbox implementation must match it;
+  each framework's own typed-schema layer (Pydantic schemas, Go structs, Java DTOs) is written to satisfy
+  the spec, not the other way around.
+- **Main DB MVP schema**: minimal — `telemetry_runs` (id uuid pk, payload jsonb, `is_completed` bool,
+  timestamps, error info) for the RabbitMQ at-least-once dedup guarantee described in the root `CLAUDE.md`,
+  plus `telemetry_results` (run_id uuid fk, metrics jsonb, completed_at) for the collected telemetry. No
+  config/catalog tables yet — those get added once the frontend actually needs to query them relationally.
+- **TypeScript package manager**: npm (Angular CLI default), for both the frontend and any future TypeScript
+  sandbox API.
+- **Frontend MVP scope**: one page — select the test (fixed to the single MVP combination for now), submit,
+  poll run status, and render the finished `telemetry_results` row as a raw table/JSON once complete. No
+  charts yet.
+- **Sandbox observability (MVP)**: no in-app instrumentation, per `fastapi.md`/`gingonic.md`/`springboot.md`
+  §6 ("no built-in OTel"). MVP observability is structured stdout logging in every sandbox container
+  (inspectable via `docker compose logs`) plus the client-side latency/error telemetry `load_n_telemetry`
+  collects and persists as the `telemetry_results` row. The Prometheus/cAdvisor/OTel-cost experiments in the
+  Brainstorm section below remain explicitly out of scope for MVP.
+- **Java package manager**: Maven — already settled in `.claude/rules/java.md`.
+- **Sandbox database layer**: the reference-domain schema under `src/sandbox/api/db/migrations/` is shared
+  across every language's sandbox API (one canonical schema/dataset, not one per language) — each
+  implementation's persistence layer just points its ORM/driver at it.
 
 
 

@@ -48,6 +48,21 @@ minimizes maintenance overhead across variants that mostly differ in one dimensi
 This keeps `APP_VARIANT` (which HTTP-client implementation to run) orthogonal to `ENVIRONMENT` (`local` /
 `prod`, per the root `CLAUDE.md` env-injection policy) — the two are independent knobs.
 
+### 2.1. A second factory for the DB-access library
+
+Which DB-access library backs `persistence/repositories/` (e.g. `asyncpg` vs a future SQLAlchemy variant) is
+its own comparison knob, orthogonal to `APP_VARIANT` — a language's HTTP-client variant and its DB-driver
+variant can vary independently. This gets its own, smaller factory:
+
+- `persistence/repositories/` defines an ABC per repository (e.g. `ProductRepository`) that `business/`
+  depends on, plus one concrete implementation per library under comparison (e.g.
+  `AsyncpgProductRepository`).
+- `persistence/factory/` reads a `DB_DRIVER` env var and returns the matching concrete implementation —
+  called once at app startup (see the `lifespan` handler in a `presentation/factory/` builder), not per
+  request, since the concrete implementation owns a connection pool.
+
+See `src/sandbox/api/src/python/` for the reference implementation of both factories.
+
 ## 3. Dependency injection
 
 Routes obtain services and repositories via FastAPI's `Depends()` mechanism — don't instantiate

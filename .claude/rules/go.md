@@ -4,7 +4,10 @@ Base language rules for all Go code in this repository: the Gin sandbox API
 (`src/sandbox/api/src/go/`, also read `gingonic.md`) and the request/telemetry container
 (`src/sandbox/load_n_telemetry/`). `load_n_telemetry` follows this file only — per the root `CLAUDE.md`, it
 is written "with as few dependencies as possible," so it must **not** pull in Gin or any other HTTP router
-framework; use the standard library (`net/http`, `encoding/json`, etc.) there.
+framework; use the standard library (`net/http`, `encoding/json`, etc.) there. The one exception is a
+Postgres client (e.g. `pgx`) — per `spec/bootstrap.md`'s MVP decisions, `load_n_telemetry` writes its
+collected results directly into a main-DB row (keyed by a UUID injected via env var at sandbox spin-up), so
+a minimal DB driver dependency is required and expected; this doesn't relax the "no HTTP framework" rule.
 
 ## 1. Version
 

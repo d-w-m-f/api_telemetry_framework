@@ -1,0 +1,20 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://${MAINDB_HOST:localhost}:${MAINDB_PORT:5433}/${MAINDB_NAME:maindb}
+    username: ${MAINDB_USER:app}
+    password: ${MAINDB_PASSWORD:app}
+  jpa:
+    open-in-view: false
+    hibernate:
+      # Schema is owned by the plain SQL files in src/maindb/migrations/ (see spec/bootstrap.md's "MVP
+      # decisions" -- no migration framework for MVP), so Hibernate only validates its entity mapping
+      # against what's already there, it never generates DDL itself.
+      ddl-auto: validate
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USER:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
+
+server:
+  port: ${PORT:8080}

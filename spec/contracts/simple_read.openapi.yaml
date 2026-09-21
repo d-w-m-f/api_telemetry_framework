@@ -1,0 +1,117 @@
+openapi: 3.0.3
+info:
+  title: Sandbox API - Simple Read Contract
+  version: "1.0.0"
+  description: >
+    Contract for the "simple read" test type (MVP test category: read; MVP test type: sequential read,
+    100-row page). Every sandbox API implementation (one per language/framework under
+    src/sandbox/api/src/<language>/) must expose exactly this endpoint and response shape, regardless of
+    which language or HTTP framework it's written in — this contract is what makes results comparable across
+    implementations. Backed by the reference-domain `products` table
+    (src/sandbox/api/db/migrations/002_reference_domain.sql) and the existing keyset-pagination query
+    (src/sandbox/api/db/queries/postgres/list_products.sql).
+
+paths:
+  /products:
+    get:
+      summary: List products, newest first, keyset-paginated
+      description: >
+        Returns up to `limit` products ordered by (created_at DESC, id DESC). Pass `after_created_at` and
+        `after_id` together (both or neither) to continue from a previous page's `next_cursor`; omitting both
+        returns the first page. `load_n_telemetry`'s MVP workload calls this endpoint with limit=100 and no
+        cursor, repeatedly, to sample latency.
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 500
+            default: 100
+        - name: after_created_at
+          in: query
+          required: false
+          description: Cursor component from a previous page's next_cursor.created_at. Must be paired with after_id.
+          schema:
+            type: string
+            format: date-time
+        - name: after_id
+          in: query
+          required: false
+          description: Cursor component from a previous page's next_cursor.id. Must be paired with after_created_at.
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: A page of products.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductPage"
+        "400":
+          description: Malformed query parameters (e.g. only one of the two cursor fields provided).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+components:
+  schemas:
+    Product:
+      type: object
+      required: [id, sku, name, price_cents, stock, category_id, attrs, created_at]
+      properties:
+        id:
+          type: integer
+          format: int64
+        sku:
+          type: string
+        name:
+          type: string
+        price_cents:
+          type: integer
+        stock:
+          type: integer
+        category_id:
+          type: integer
+          format: int64
+        attrs:
+          type: object
+          additionalProperties: true
+        created_at:
+          type: string
+          format: date-time
+
+    Cursor:
+      type: object
+      nullable: true
+      required: [created_at, id]
+      properties:
+        created_at:
+          type: string
+          format: date-time
+        id:
+          type: integer
+          format: int64
+
+    ProductPage:
+      type: object
+      required: [items, next_cursor]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/Product"
+        next_cursor:
+          description: Cursor for the next page, or null if this page had fewer than `limit` items.
+          allOf:
+            - $ref: "#/components/schemas/Cursor"
+
+    Error:
+      type: object
+      required: [detail]
+      properties:
+        detail:
+          type: string

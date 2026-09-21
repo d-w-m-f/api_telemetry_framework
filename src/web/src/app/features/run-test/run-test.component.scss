@@ -1,0 +1,18 @@
+.run-test-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.status {
+  margin-top: 1.5rem;
+}
+
+.error {
+  color: var(--mat-sys-error, #b3261e);
+}
+
+.metrics-table {
+  margin-top: 0.5rem;
+}

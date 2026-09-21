@@ -1,0 +1,48 @@
+# Local infra only: RabbitMQ (the broker) + the main Postgres database. Per spec/bootstrap.md's MVP scope,
+# the backend, telemetry consumer, and frontend run as normal host processes during MVP dev (reading
+# .env.local for the connection info this file publishes) -- they are not containerized here.
+#
+# `telemetry-net` is a fixed-name network so sandbox docker-compose.yml files (see
+# src/sandbox/api/src/python/docker-compose.yml) can join it as an external network: that's how
+# load_n_telemetry, running inside a sandbox's own compose project, reaches `maindb` by name to write its
+# results directly (see spec/bootstrap.md's "MVP decisions" and CLAUDE.md's architecture section).
+
+networks:
+  telemetry-net:
+    name: telemetry-net
+
+volumes:
+  maindb-data:
+
+services:
+  rabbitmq:
+    image: rabbitmq:4-management-alpine
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - telemetry-net
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  maindb:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: ${MAINDB_USER:-app}
+      POSTGRES_PASSWORD: ${MAINDB_PASSWORD:-app}
+      POSTGRES_DB: ${MAINDB_NAME:-maindb}
+    ports:
+      - "5432:5432"
+    volumes:
+      - ../src/maindb/migrations:/docker-entrypoint-initdb.d:ro
+      - maindb-data:/var/lib/postgresql/data
+    networks:
+      - telemetry-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${MAINDB_USER:-app} -d ${MAINDB_NAME:-maindb}"]
+      interval: 2s
+      timeout: 3s
+      retries: 20
