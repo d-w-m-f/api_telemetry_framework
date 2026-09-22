@@ -9,3 +9,8 @@ __pycache__/
 *.pyc
 dist/
 node_modules/
+
+# mise / overmind local runtime artifacts -- never shared, per-contributor only
+mise.local.toml
+.overmind.env
+.overmind.sock
