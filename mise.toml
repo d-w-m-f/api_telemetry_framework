@@ -1,0 +1,11 @@
+# Pins every language runtime/package manager used across the monorepo (see the root CLAUDE.md directory
+# structure and .claude/rules/*.md for what each is used for). `mise trust && mise install` provisions all
+# of them project-scoped -- no system-wide installs, no per-contributor version drift.
+
+[tools]
+java = "temurin-21"  # main backend (Spring Boot) + Java sandbox API -- see .claude/rules/java.md
+maven = "3.9"        # build tool for both Java modules -- see .claude/rules/java.md
+node = "22"          # frontend (Angular 19) -- see .claude/rules/angular.md, typescript.md
+python = "3.14"      # telemetry consumer + Python sandbox API -- see .claude/rules/python.md
+poetry = "latest"    # package manager for both Python apps -- see .claude/rules/python.md §3
+go = "1.25"          # load_n_telemetry + Go sandbox API -- see .claude/rules/go.md

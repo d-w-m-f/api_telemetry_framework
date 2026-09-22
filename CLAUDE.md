@@ -1,62 +1,91 @@
-Append this to whatever CLAUDE.md structure you find fitting to write:
+# CLAUDE.md
 
-- This is a monorepo of a telemetry framework project
-- On all 'sensible products' of this codebase, utilize local env var injection. Always utilize .env, .env.local and .env.prod templates. Always utilize env var ENVIRONMENT='local' or 'prod'. A 'sensible product' is something that would be affect in some way by environment differece (examples: the main frontend and backend)
-- All code, comments and communication shall be in English
-- Put a directory structure guide on claude.md on the following format example:
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## Project overview
+
+This is a monorepo for an API throughput and telemetry benchmarking framework. It compares HTTP/DB stack
+implementations (language, framework, test type, load profile) by running standardized load tests against
+disposable "sandbox" environments and collecting telemetry.
+
+## Current state
+
+See docs/current_state.md
+
+## Directory structure
 
 ```text
-docs/
+.claude/
+  settings.json          # Permission rules (e.g. the .claudeignore/ deny list below)
+  rules/                 # Per-language / per-framework coding rules, read before writing code in that stack
+  skills/
+    update-repo-map/     # On-demand skill: reconciles this directory-structure block with the real repo
+                         # (see docs/context_scaling.md) -- invoke it, don't hand-edit this block stale
+.claudeignore/           # Planning/scratch notes excluded from reads by .claude/settings.json deny rules
+mise.toml                # Pins every language runtime/package manager in the repo -- `mise trust && mise install`
+Procfile                 # Local process list (infra, backend, telemetry_consumer, web) -- run via `overmind start`
+deployment/              # K8s/Kustomize + ArgoCD config (empty scaffold; planned in docs/deployment.md)
 docker/
+  docker-compose.yml     # Local infra: RabbitMQ + main PostgreSQL, on the shared `telemetry-net` network
+docs/
+  architecture.md        # How the pieces fit together: frontend, backend, RabbitMQ, consumer, sandbox
+  business.md            # The core domain: what's compared (language, HTTP client, test type, load, DB)
+  services.md            # Per-service stack, dependencies, and environment variables
+  current_state.md       # What's actually built and working right now, vs. still stubbed out
+  ci.md                  # GitHub Actions CI plan (planned, not yet wired up)
+  deployment.md          # Kubernetes + ArgoCD deployment plan for deployment/ (planned, not yet wired up)
+  context_scaling.md     # How/when to scale AI context tooling (repo map, symbol search, RAG) with repo size
+spec/
+  bootstrap.md           # MVP scope, resolved decisions, and load-testing methodology notes
+  contracts/             # OpenAPI specs, one per test type — the cross-language sandbox API contract
 src/
-...
-.gitignore
-...
+  backend/               # Main ("normal") backend — Spring Boot: POST/GET /api/telemetry-tests
+  maindb/
+    migrations/          # Plain numbered SQL: telemetry_runs, telemetry_results (no migration framework)
+  telemetry_consumer/    # The single Python consumer described in Architecture below
+  web/                   # Frontend — Angular: one page, submit + poll + render (see angular.md)
+  sandbox/
+    api/                 # Sandbox applications under test, one implementation per language/framework
+      db/
+        migrations/      # Sandbox DB schema (reference domain: categories, products, customers, orders)
+        queries/postgres/# Named SQL queries used by sandbox API implementations
+        seed/            # Dataset seeding: generate.py, profiles.yaml (tiny/small/large profiles)
+      src/
+        go/              # GinGonic sandbox API implementation (empty scaffold)
+        java/            # Java sandbox API implementation (empty scaffold)
+        python/          # FastAPI sandbox API (fastapi_async variant) + docker-compose.yml for this stack
+        typescript/      # TypeScript sandbox API implementation (empty scaffold)
+    load_n_telemetry/    # Go request/telemetry container: waits for the API, fires the read workload,
+                         # writes results directly into telemetry_results (see spec/bootstrap.md)
+General_Architecture.png # Reference architecture diagram
 ```
 
-- The frontend stack App is Angular
-- The backend stack App is Python + FastAPI 
+## Environment configuration
 
-- The project architecture can be understood by interpreting General_Architecture.png. Also, you can consider the following:
+For every "sensible product" in this monorepo — anything whose behavior differs by environment (e.g. the
+main frontend and main backend) — use local env var injection:
 
-We have a frontend (Angular) and a backend (SpringBoot). This backend is also refered as the 'normal' backend, or rarelly as the 'main' backend. 
+- Provide `.env`, `.env.local`, and `.env.prod` templates.
+- Select behavior via an `ENVIRONMENT` env var with value `'local'` or `'prod'`.
 
-The normal backend also connects to a database layer using PostgreSQL. That is called the main database.
+## Language policy
 
-The frontend gets ehxibition data from the backend on a common client-server model.
+All code, comments, and communication in this repository must be in English.
 
-The frontend also generates telemetry-test payloads to the backend. These are queued to a RabbitMQ broker and are processed asynchronously on a sandbox environment.
+## Architecture
 
-We utilize RabbitMQ as a broker, with two direct exchanges:
-- TelemetryTest: for receiving the telemetry tasks
-- DLQ: for aggregating tasks that fail/can't be processed by some reason
-
-Note: The RabbitMQ AND worker must be both configured to garantee at-least-once processing. 
-Note: For not letting the same task be processed twice, at enqueueing, a row with the event must be registered with a serial id, the json event, and a status. This status shall be atualized only on completion (so its a bool is_completed, false meaning everything thats not completed [waiting, dlq, retry, processing, etc]).
-
-To consume telemetry events, we put a python consumer hearing to the TelemetryTest queue. This python consumer than has the following responsabilities:
-- To spin the correct sandbox environment accordingly to the event payload. 
-Importantly, since this is a monorepo, it needs to not bloat the image with all other apis from other languages or the same language)
-Also, the doing of it is still a challenge to solve
-- To monitor and collect the 
-- During telemetry collection and after completion, saving temporal and general state to the main database
-- In case of error, saving it to the main database and enqueueing task to DLQ
-
-For now, we will be limiting only one consumer on the TelemetryTest queue.
-
-The Sandbox environment by itself is composed of three separate layers:
-1) Database layer: Where we spin the DB engine that is going to receive the load. For now, only PostgreSQL. This is called a sandbox database.
-2) API/Application Layer: The proper API microsservice(s) that are beeing testes and metrified. This is called a sandbox application
-3) Request/Telemetry Container: The container that is going to conduct the testing processes - so, possibly seeding/warming the sandbox database, firing requests, collecting telemetry, returning data somehow to the consumer. This is written in GoLang with as few dependencies as possible.
+See documentation at docs/architecture.md
 
 
-- the complete list of test/comparison criteria supported by this framework is the following:
+## Writing Sandbox APIs
 
-1. Language: Python, Java, Go, ...
-2. HTTP client: FastAPI, GinGonic
-    2.1 Specific client implementations: FastAPI async, FastAPI sync, GinGonic w/ channels
-3. Test category: Read Or Write
-4. Test type: Sequential read, complex joins read, bulk write
-    4.1: Test configurations: Category size (small, medium, big, extreme), environment resources, repetitions, etc...
-5. Load type
-6. DB Engine (For now postgreSQL only, but it will be a knob)
+Sandbox APIs live under `src/sandbox/api/src/<language>/`, one directory per language — a language directory
+can hold multiple HTTP-client variants (e.g. FastAPI async/sync) selected by a factory at the entrypoint
+rather than split into separate directories. Before writing one, read the rules for both the language and
+the HTTP framework in `.claude/rules/` (e.g. a Python/FastAPI sandbox API needs `fastapi.md` and
+`python.md`). See `.claude/rules/writing_sandbox_apis.md`.
+
+`src/sandbox/api/src/python/` (the `fastapi_async` variant) is the reference implementation for this
+pattern — including its own `docker-compose.yml` (the 3-layer sandbox: `sandbox-db`, `sandbox-seed`,
+`sandbox-api`, `load_n_telemetry`) and the DB-driver factory pattern documented in `fastapi.md` §2.1. Use it
+as the template when adding the next language/framework.

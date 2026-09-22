@@ -1,0 +1,7 @@
+spring:
+  jpa:
+    hibernate:
+      # @DataJpaTest auto-configures an embedded H2 datasource (h2 is a test-scope dependency); unlike the
+      # real Postgres schema (validate-only, owned by src/maindb/migrations/), tests let Hibernate generate
+      # the schema itself since there's no migration file to validate an embedded DB against.
+      ddl-auto: create-drop
