@@ -16,14 +16,25 @@ See docs/current_state.md
 
 ```text
 .claude/
-  rules/                # Per-language / per-framework coding rules, read before writing code in that stack
+  settings.json          # Permission rules (e.g. the .claudeignore/ deny list below)
+  rules/                 # Per-language / per-framework coding rules, read before writing code in that stack
+  skills/
+    update-repo-map/     # On-demand skill: reconciles this directory-structure block with the real repo
+                         # (see docs/context_scaling.md) -- invoke it, don't hand-edit this block stale
 .claudeignore/           # Planning/scratch notes excluded from reads by .claude/settings.json deny rules
 mise.toml                # Pins every language runtime/package manager in the repo -- `mise trust && mise install`
 Procfile                 # Local process list (infra, backend, telemetry_consumer, web) -- run via `overmind start`
 deployment/              # K8s/Kustomize + ArgoCD config (empty scaffold; planned in docs/deployment.md)
 docker/
   docker-compose.yml     # Local infra: RabbitMQ + main PostgreSQL, on the shared `telemetry-net` network
-docs/                    # Project documentation: architecture, business domain, services, current state
+docs/
+  architecture.md        # How the pieces fit together: frontend, backend, RabbitMQ, consumer, sandbox
+  business.md            # The core domain: what's compared (language, HTTP client, test type, load, DB)
+  services.md            # Per-service stack, dependencies, and environment variables
+  current_state.md       # What's actually built and working right now, vs. still stubbed out
+  ci.md                  # GitHub Actions CI plan (planned, not yet wired up)
+  deployment.md          # Kubernetes + ArgoCD deployment plan for deployment/ (planned, not yet wired up)
+  context_scaling.md     # How/when to scale AI context tooling (repo map, symbol search, RAG) with repo size
 spec/
   bootstrap.md           # MVP scope, resolved decisions, and load-testing methodology notes
   contracts/             # OpenAPI specs, one per test type — the cross-language sandbox API contract

@@ -105,6 +105,8 @@ and language/framework coding rules (`.claude/rules/`). Further documentation li
 - [`docs/ci.md`](docs/ci.md) — the GitHub Actions CI plan (planned, not yet wired up).
 - [`docs/deployment.md`](docs/deployment.md) — the Kubernetes + ArgoCD deployment plan for `deployment/`
   (planned, not yet wired up).
+- [`docs/context_scaling.md`](docs/context_scaling.md) — when (and when not) to adopt heavier AI-navigation
+  tooling as the repo grows, and how the repo map stays accurate in the meantime.
 
 Design rationale, MVP scope, and open experiment ideas live in [`spec/bootstrap.md`](spec/bootstrap.md);
 cross-language sandbox API contracts live under [`spec/contracts/`](spec/contracts/).
