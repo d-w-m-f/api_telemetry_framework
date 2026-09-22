@@ -6,49 +6,42 @@ This is a monorepo of a framework that aims to execute and compare load tests in
 
 ### Local
 
-Prerequisites: Docker + Docker Compose, Java 21 + Maven, Node.js (Angular 19), Python 3.14 + Poetry.
+Prerequisites: [Docker](https://docs.docker.com/get-docker/) + Docker Compose,
+[mise](https://mise.jdx.dev/) (runtime version manager), and
+[overmind](https://github.com/DarthSim/overmind) (process manager — needs `tmux`). Every language
+runtime/package manager itself (Java, Maven, Node, Python, Poetry, Go) is pinned in [`mise.toml`](mise.toml)
+and provisioned by mise — no need to install any of them yourself.
 
-1. Every service already ships a working `.env.local` (`docker/`, `src/backend/`, `src/telemetry_consumer/`,
+1. Trust and install the pinned toolchain (one-time, or whenever `mise.toml` changes):
+
+   ```bash
+   mise trust && mise install
+   ```
+
+2. First-time setup for the two apps that need an explicit install step (Maven resolves its own
+   dependencies on first run, so the backend needs nothing here):
+
+   ```bash
+   (cd src/telemetry_consumer && poetry install)
+   (cd src/web && npm install)
+   ```
+
+3. Every service already ships a working `.env.local` (`docker/`, `src/backend/`, `src/telemetry_consumer/`,
    `src/web/`) — no edits needed to get the local stack running. `.env` is the versioned template each
    `.env.local`/`.env.prod` is derived from; see the root [`CLAUDE.md`](CLAUDE.md#environment-configuration).
 
-2. Start the shared local infra (RabbitMQ + main PostgreSQL):
+4. Start everything — local infra (RabbitMQ + main PostgreSQL), the backend, the telemetry consumer, and
+   the frontend — with a single command, per the root [`Procfile`](Procfile):
 
    ```bash
-   docker compose --env-file docker/.env.local -f docker/docker-compose.yml up -d
+   overmind start
    ```
 
-3. Run the main backend (reads `src/backend/.env.local`):
+   The backend and consumer each wait for infra's ports to open before connecting, so start order isn't a
+   concern. Open `http://localhost:4200`. Stop everything with `Ctrl-C`, or `overmind stop`/`overmind kill`
+   from another shell.
 
-   ```bash
-   cd src/backend
-   set -a && source .env.local && set +a
-   mvn spring-boot:run
-   ```
-
-4. Run the telemetry consumer (reads `src/telemetry_consumer/.env.local`):
-
-   ```bash
-   cd src/telemetry_consumer
-   poetry install
-   set -a && source .env.local && set +a
-   poetry run python src/main.py
-   ```
-
-   Docker must be available to this process — it shells out to `docker compose` to spin up a sandbox
-   whenever it picks up a task (see `docs/architecture.md`).
-
-5. Run the frontend:
-
-   ```bash
-   cd src/web
-   npm install
-   npm start
-   ```
-
-   Open `http://localhost:4200`.
-
-6. Submit a telemetry test, either from the frontend or directly against the backend:
+5. Submit a telemetry test, either from the frontend or directly against the backend:
 
    ```bash
    curl -X POST http://localhost:8080/api/telemetry-tests \
@@ -57,11 +50,13 @@ Prerequisites: Docker + Docker Compose, Java 21 + Maven, Node.js (Angular 19), P
    ```
 
    Poll `GET http://localhost:8080/api/telemetry-tests/{runId}` (or refresh the frontend) until
-   `completed` is `true`. The consumer (step 4) picks the task up, builds, and runs the sandbox for you —
-   no extra manual `docker compose` call needed here.
+   `completed` is `true`. The consumer picks the task up, builds, and runs the sandbox for you — Docker
+   must be available to it, since it shells out to `docker compose` (see `docs/architecture.md`).
 
 Only the `python` + `fastapi_async` combination is wired end-to-end today (see
-[`docs/current_state.md`](docs/current_state.md)).
+[`docs/current_state.md`](docs/current_state.md)). To work on a single process on its own (e.g. iterating
+on the frontend without the rest of the stack), run `overmind connect web` to attach to its pane, or just
+run that process's own command directly, as shown inside [`Procfile`](Procfile).
 
 ### Prod
 

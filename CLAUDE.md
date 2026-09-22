@@ -18,10 +18,12 @@ See docs/current_state.md
 .claude/
   rules/                # Per-language / per-framework coding rules, read before writing code in that stack
 .claudeignore/           # Planning/scratch notes excluded from reads by .claude/settings.json deny rules
+mise.toml                # Pins every language runtime/package manager in the repo -- `mise trust && mise install`
+Procfile                 # Local process list (infra, backend, telemetry_consumer, web) -- run via `overmind start`
 deployment/              # Deployment configuration (empty scaffold)
 docker/
   docker-compose.yml     # Local infra: RabbitMQ + main PostgreSQL, on the shared `telemetry-net` network
-docs/                    # Project documentation (empty scaffold)
+docs/                    # Project documentation: architecture, business domain, services, current state
 spec/
   bootstrap.md           # MVP scope, resolved decisions, and load-testing methodology notes
   contracts/             # OpenAPI specs, one per test type — the cross-language sandbox API contract
