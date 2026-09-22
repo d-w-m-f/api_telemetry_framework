@@ -20,7 +20,7 @@ See docs/current_state.md
 .claudeignore/           # Planning/scratch notes excluded from reads by .claude/settings.json deny rules
 mise.toml                # Pins every language runtime/package manager in the repo -- `mise trust && mise install`
 Procfile                 # Local process list (infra, backend, telemetry_consumer, web) -- run via `overmind start`
-deployment/              # Deployment configuration (empty scaffold)
+deployment/              # K8s/Kustomize + ArgoCD config (empty scaffold; planned in docs/deployment.md)
 docker/
   docker-compose.yml     # Local infra: RabbitMQ + main PostgreSQL, on the shared `telemetry-net` network
 docs/                    # Project documentation: architecture, business domain, services, current state

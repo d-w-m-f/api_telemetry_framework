@@ -102,6 +102,9 @@ and language/framework coding rules (`.claude/rules/`). Further documentation li
   web): stack, dependencies, and environment variables.
 - [`docs/current_state.md`](docs/current_state.md) — what's actually built and working right now, versus
   what's still stubbed out.
+- [`docs/ci.md`](docs/ci.md) — the GitHub Actions CI plan (planned, not yet wired up).
+- [`docs/deployment.md`](docs/deployment.md) — the Kubernetes + ArgoCD deployment plan for `deployment/`
+  (planned, not yet wired up).
 
 Design rationale, MVP scope, and open experiment ideas live in [`spec/bootstrap.md`](spec/bootstrap.md);
 cross-language sandbox API contracts live under [`spec/contracts/`](spec/contracts/).
