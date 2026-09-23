@@ -35,6 +35,7 @@ docs/
   ci.md                  # GitHub Actions CI plan (planned, not yet wired up)
   deployment.md          # Kubernetes + ArgoCD deployment plan for deployment/ (planned, not yet wired up)
   context_scaling.md     # How/when to scale AI context tooling (repo map, symbol search, RAG) with repo size
+  known_issues.md        # Production-readiness gaps found by review, not yet fixed -- prioritized backlog
 spec/
   bootstrap.md           # MVP scope, resolved decisions, and load-testing methodology notes
   contracts/             # OpenAPI specs, one per test type — the cross-language sandbox API contract

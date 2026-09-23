@@ -107,13 +107,14 @@ and language/framework coding rules (`.claude/rules/`). Further documentation li
   (planned, not yet wired up).
 - [`docs/context_scaling.md`](docs/context_scaling.md) — when (and when not) to adopt heavier AI-navigation
   tooling as the repo grows, and how the repo map stays accurate in the meantime.
+- [`docs/known_issues.md`](docs/known_issues.md) — production-readiness gaps found by review (bugs,
+  testing/observability/API gaps), prioritized, not yet fixed.
 
 Design rationale, MVP scope, and open experiment ideas live in [`spec/bootstrap.md`](spec/bootstrap.md);
 cross-language sandbox API contracts live under [`spec/contracts/`](spec/contracts/).
 
 ## Contributors
 
-<a href="#" target="_blank"><img alt="GitHub" src="https://img.shields.io/badge/GitHub-%23181717.svg?style=for-the-badge&logo=github&logoColor=white"></a>
-<a href="#" target="_blank"><img alt="LinkedIn" src="https://img.shields.io/badge/LinkedIn-%230077B5.svg?style=for-the-badge&logo=linkedin&logoColor=white"></a>
+<a href="https://www.linkedin.com/in/derickwmfrias/" target="_blank"><img alt="LinkedIn" src="https://img.shields.io/badge/LinkedIn-%230077B5.svg?style=for-the-badge&logo=linkedin&logoColor=white"></a>
 
 **Dérick William de Moraes Frias**
